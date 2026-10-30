@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>ระบบบริหารจัดการฟาร์มไก่ไข่ | Egg Farm Management System</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🥚</text></svg>">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: #121A16;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    #appFrame {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
+    }
+    .fallback-bar {
+      position: fixed;
+      bottom: 8px;
+      right: 12px;
+      z-index: 9999;
+      background: rgba(22, 132, 91, 0.9);
+      color: #fff;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      text-decoration: none;
+      backdrop-filter: blur(4px);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+      transition: all 0.2s ease;
+    }
+    .fallback-bar:hover {
+      background: #106243;
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ฝัง Web App จาก Google Apps Script แบบเต็มจอ 100% -->
+  <iframe 
+    id="appFrame" 
+    src="https://script.google.com/macros/s/AKfycbw1z7Np9YGgZob5uYo0_EPyUSsemCAcIuFTXeGtY8jj_zMkiRzbvCQYUdMpDx-2zLSt/exec" 
+    allow="camera; autoplay; fullscreen" 
+    sandbox="allow-forms allow-modals allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts">
+  </iframe>
+
+  <!-- ปุ่มลัดกรณีต้องการเปิดหน้าต่างแยก -->
+  <a href="https://script.google.com/macros/s/AKfycbw1z7Np9YGgZob5uYo0_EPyUSsemCAcIuFTXeGtY8jj_zMkiRzbvCQYUdMpDx-2zLSt/exec" target="_blank" class="fallback-bar" title="เปิดหน้าต่างเต็ม">
+    ↗ เปิดลิงก์ตรง
+  </a>
+
+</body>
+</html>
+
