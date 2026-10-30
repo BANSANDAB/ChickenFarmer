@@ -1,0 +1,2642 @@
+<!DOCTYPE html>
+<html lang="th" data-bs-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>ระบบบริหารจัดการฟาร์มไก่ไข่ | Egg Farm Management System</title>
+  
+  <!-- Google Fonts: Prompt & Sarabun -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Bootstrap 5 CSS & Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  
+  <!-- Chart.js for Visualizations -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+  
+  <!-- HLS.js for CCTV Video Streaming Gateway -->
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.7/dist/hls.min.js"></script>
+
+  <!-- Complete Inlined Theme Styles -->
+  <style>
+    :root {
+      --farm-primary: #16845B;
+      --farm-primary-dark: #106243;
+      --farm-primary-light: #EAF7EF;
+      --farm-primary-subtle: #d6f0e0;
+      --farm-gold: #F2B84B;
+      --farm-gold-light: #fef6e7;
+      --farm-text: #25352D;
+      --farm-text-muted: #64746B;
+      --farm-bg: #F4F8F5;
+      --farm-card-bg: #FFFFFF;
+      --farm-border: #E2ECE5;
+      --farm-danger: #D9534F;
+      --farm-danger-light: #FDE8E7;
+      --farm-sidebar-width: 260px;
+      --farm-header-height: 70px;
+      --farm-transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    [data-bs-theme="dark"] {
+      --farm-primary: #1DB97D;
+      --farm-primary-dark: #16845B;
+      --farm-primary-light: #1A362B;
+      --farm-primary-subtle: #234839;
+      --farm-gold: #F5C563;
+      --farm-gold-light: #3D331A;
+      --farm-text: #E3EDE7;
+      --farm-text-muted: #95A99F;
+      --farm-bg: #121A16;
+      --farm-card-bg: #1B2620;
+      --farm-border: #26382F;
+      --farm-danger: #FF6B6B;
+      --farm-danger-light: #3E1E1E;
+    }
+
+    body {
+      font-family: 'Prompt', 'Sarabun', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: var(--farm-bg);
+      color: var(--farm-text);
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+      font-weight: 600;
+      color: var(--farm-text);
+      letter-spacing: -0.01em;
+    }
+
+    .app-layout {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    .app-sidebar {
+      width: var(--farm-sidebar-width);
+      background-color: var(--farm-card-bg);
+      border-right: 1px solid var(--farm-border);
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      z-index: 1040;
+      transition: var(--farm-transition);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sidebar-brand {
+      height: var(--farm-header-height);
+      display: flex;
+      align-items: center;
+      padding: 0 1.5rem;
+      border-bottom: 1px solid var(--farm-border);
+      gap: 0.75rem;
+    }
+
+    .brand-icon {
+      width: 42px;
+      height: 42px;
+      background: linear-gradient(135deg, var(--farm-primary), var(--farm-primary-dark));
+      color: #fff;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.35rem;
+      box-shadow: 0 4px 10px rgba(22, 132, 91, 0.25);
+    }
+
+    .brand-text h1 {
+      font-size: 1.05rem;
+      margin: 0;
+      line-height: 1.2;
+      color: var(--farm-text);
+    }
+
+    .brand-text small {
+      font-size: 0.75rem;
+      color: var(--farm-text-muted);
+      font-weight: 400;
+    }
+
+    .sidebar-nav {
+      padding: 1.25rem 0.85rem;
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .nav-section-title {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--farm-text-muted);
+      padding: 0.5rem 0.75rem 0.25rem;
+      margin-top: 0.5rem;
+    }
+
+    .nav-item-link {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      padding: 0.75rem 1rem;
+      color: var(--farm-text);
+      text-decoration: none;
+      border-radius: 12px;
+      font-weight: 500;
+      font-size: 0.95rem;
+      transition: var(--farm-transition);
+      margin-bottom: 0.35rem;
+    }
+
+    .nav-item-link i {
+      font-size: 1.25rem;
+      color: var(--farm-text-muted);
+      transition: var(--farm-transition);
+    }
+
+    .nav-item-link:hover {
+      background-color: var(--farm-primary-light);
+      color: var(--farm-primary);
+    }
+
+    .nav-item-link:hover i {
+      color: var(--farm-primary);
+    }
+
+    .nav-item-link.active {
+      background-color: var(--farm-primary);
+      color: #FFFFFF;
+      font-weight: 600;
+      box-shadow: 0 4px 12px rgba(22, 132, 91, 0.28);
+    }
+
+    .nav-item-link.active i {
+      color: #FFFFFF;
+    }
+
+    .sidebar-footer {
+      padding: 1rem;
+      border-top: 1px solid var(--farm-border);
+      font-size: 0.8rem;
+      color: var(--farm-text-muted);
+    }
+
+    .app-main {
+      margin-left: var(--farm-sidebar-width);
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      transition: var(--farm-transition);
+    }
+
+    .app-topbar {
+      height: var(--farm-header-height);
+      background-color: var(--farm-card-bg);
+      border-bottom: 1px solid var(--farm-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 1.75rem;
+      position: sticky;
+      top: 0;
+      z-index: 1020;
+    }
+
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .sidebar-toggle-btn {
+      display: none;
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      color: var(--farm-text);
+      cursor: pointer;
+      padding: 0.25rem;
+    }
+
+    .page-title-badge {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--farm-text);
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .date-badge {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.45rem 0.9rem;
+      background-color: var(--farm-primary-light);
+      color: var(--farm-primary);
+      border-radius: 30px;
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+
+    .theme-toggle-btn {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      border: 1px solid var(--farm-border);
+      background: var(--farm-card-bg);
+      color: var(--farm-text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: var(--farm-transition);
+    }
+
+    .theme-toggle-btn:hover {
+      background-color: var(--farm-primary-light);
+      color: var(--farm-primary);
+    }
+
+    .app-content {
+      padding: 1.75rem;
+      flex: 1;
+    }
+
+    .farm-card {
+      background-color: var(--farm-card-bg);
+      border: 1px solid var(--farm-border);
+      border-radius: 16px;
+      padding: 1.5rem;
+      box-shadow: 0 4px 16px rgba(37, 53, 45, 0.03);
+      transition: var(--farm-transition);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .farm-card:hover {
+      box-shadow: 0 6px 22px rgba(37, 53, 45, 0.07);
+    }
+
+    .stat-card {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .stat-info .stat-label {
+      font-size: 0.85rem;
+      color: var(--farm-text-muted);
+      font-weight: 500;
+      margin-bottom: 0.4rem;
+    }
+
+    .stat-info .stat-value {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--farm-text);
+      line-height: 1.2;
+    }
+
+    .stat-info .stat-unit {
+      font-size: 0.9rem;
+      font-weight: 400;
+      color: var(--farm-text-muted);
+      margin-left: 0.25rem;
+    }
+
+    .stat-icon-box {
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      flex-shrink: 0;
+    }
+
+    .stat-icon-income { background-color: var(--farm-primary-light); color: var(--farm-primary); }
+    .stat-icon-expense { background-color: var(--farm-danger-light); color: var(--farm-danger); }
+    .stat-icon-gold { background-color: var(--farm-gold-light); color: #B37D19; }
+
+    .farm-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.35rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .badge-income { background-color: var(--farm-primary-light); color: var(--farm-primary); }
+    .badge-expense { background-color: var(--farm-danger-light); color: var(--farm-danger); }
+    .badge-gold { background-color: var(--farm-gold-light); color: #B37D19; }
+
+    .form-label {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--farm-text);
+      margin-bottom: 0.4rem;
+    }
+
+    .form-control, .form-select {
+      border: 1px solid var(--farm-border);
+      border-radius: 10px;
+      padding: 0.65rem 0.9rem;
+      font-size: 0.95rem;
+      background-color: var(--farm-card-bg);
+      color: var(--farm-text);
+      transition: var(--farm-transition);
+    }
+
+    .form-control:focus, .form-select:focus {
+      border-color: var(--farm-primary);
+      box-shadow: 0 0 0 0.2rem rgba(22, 132, 91, 0.15);
+      background-color: var(--farm-card-bg);
+      color: var(--farm-text);
+    }
+
+    .btn-farm-primary {
+      background: linear-gradient(135deg, var(--farm-primary), var(--farm-primary-dark));
+      color: #FFFFFF;
+      border: none;
+      border-radius: 10px;
+      padding: 0.65rem 1.35rem;
+      font-weight: 600;
+      font-size: 0.95rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: var(--farm-transition);
+    }
+
+    .btn-farm-primary:hover {
+      background: linear-gradient(135deg, var(--farm-primary-dark), #0C4D34);
+      color: #FFFFFF;
+      box-shadow: 0 4px 14px rgba(22, 132, 91, 0.35);
+    }
+
+    .btn-farm-outline {
+      background: transparent;
+      color: var(--farm-primary);
+      border: 1.5px solid var(--farm-primary);
+      border-radius: 10px;
+      padding: 0.6rem 1.25rem;
+      font-weight: 600;
+      font-size: 0.95rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: var(--farm-transition);
+    }
+
+    .btn-farm-outline:hover {
+      background-color: var(--farm-primary-light);
+      color: var(--farm-primary-dark);
+    }
+
+    .btn-farm-secondary {
+      background: var(--farm-bg);
+      color: var(--farm-text);
+      border: 1px solid var(--farm-border);
+      border-radius: 10px;
+      padding: 0.65rem 1.25rem;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: var(--farm-transition);
+    }
+
+    .btn-farm-secondary:hover {
+      background: var(--farm-border);
+      color: var(--farm-text);
+    }
+
+    .farm-table-container {
+      overflow-x: auto;
+      border-radius: 12px;
+      border: 1px solid var(--farm-border);
+    }
+
+    .table-farm {
+      width: 100%;
+      margin-bottom: 0;
+      vertical-align: middle;
+    }
+
+    .table-farm thead th {
+      background-color: var(--farm-primary-light);
+      color: var(--farm-primary-dark);
+      font-weight: 600;
+      font-size: 0.85rem;
+      padding: 0.9rem 1rem;
+      border-bottom: 1px solid var(--farm-border);
+      white-space: nowrap;
+    }
+
+    .table-farm tbody td {
+      padding: 0.9rem 1rem;
+      font-size: 0.9rem;
+      border-bottom: 1px solid var(--farm-border);
+      color: var(--farm-text);
+    }
+
+    .table-farm tbody tr:last-child td { border-bottom: none; }
+    .table-farm tbody tr:hover { background-color: rgba(22, 132, 91, 0.03); }
+
+    .btn-action-icon {
+      width: 34px;
+      height: 34px;
+      padding: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      border: 1px solid var(--farm-border);
+      background: var(--farm-card-bg);
+      color: var(--farm-text-muted);
+      transition: var(--farm-transition);
+    }
+
+    .btn-action-icon:hover {
+      color: var(--farm-primary);
+      border-color: var(--farm-primary);
+      background: var(--farm-primary-light);
+    }
+
+    .btn-action-icon.danger:hover {
+      color: var(--farm-danger);
+      border-color: var(--farm-danger);
+      background: var(--farm-danger-light);
+    }
+
+    .upload-dropzone {
+      border: 2px dashed var(--farm-border);
+      border-radius: 12px;
+      padding: 1.25rem 1rem;
+      text-align: center;
+      cursor: pointer;
+      background-color: rgba(22, 132, 91, 0.02);
+      transition: var(--farm-transition);
+      min-height: 115px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .upload-dropzone:hover {
+      border-color: var(--farm-primary);
+      background-color: var(--farm-primary-light);
+    }
+
+    .image-preview-wrapper {
+      position: relative;
+      display: inline-block;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--farm-border);
+      max-width: 220px;
+      max-height: 220px;
+      margin-top: 0.75rem;
+    }
+
+    .image-preview-wrapper img {
+      width: 100%;
+      height: auto;
+      display: block;
+      object-fit: cover;
+    }
+
+    .btn-remove-preview {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      background: rgba(0, 0, 0, 0.65);
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 0.85rem;
+    }
+
+    .cctv-stage {
+      background-color: #0b110e;
+      border-radius: 16px;
+      overflow: hidden;
+      position: relative;
+      aspect-ratio: 16 / 9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+    }
+
+    .cctv-video {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .cctv-overlay-status {
+      position: absolute;
+      top: 15px;
+      left: 15px;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(4px);
+      padding: 0.35rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      color: #fff;
+    }
+
+    .status-pulse {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: #10B981;
+      box-shadow: 0 0 8px #10B981;
+    }
+
+    .status-pulse.offline { background-color: #EF4444; box-shadow: 0 0 8px #EF4444; }
+    .status-pulse.warning { background-color: #F59E0B; box-shadow: 0 0 8px #F59E0B; }
+
+    .spinner-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(18, 26, 22, 0.6);
+      backdrop-filter: blur(3px);
+      z-index: 9999;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      color: #fff;
+    }
+    .spinner-overlay.show { display: flex; }
+
+    @media print {
+      body {
+        background: #FFFFFF !important;
+        color: #000000 !important;
+        font-size: 11pt !important;
+        font-family: 'Sarabun', 'Prompt', sans-serif !important;
+      }
+      .app-sidebar, .app-topbar, .btn, .print-hide, .pagination,
+      .modal-backdrop, .toast-container, .theme-toggle-btn {
+        display: none !important;
+      }
+      .app-main { margin-left: 0 !important; padding: 0 !important; }
+      .app-content { padding: 0 !important; }
+      .print-sheet {
+        display: block !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 10mm !important;
+        page-break-after: always;
+      }
+      .table-farm { border: 1px solid #000 !important; }
+      .table-farm thead th {
+        background-color: #f0f0f0 !important;
+        color: #000 !important;
+        border: 1px solid #000 !important;
+      }
+      .table-farm tbody td { border: 1px solid #ddd !important; color: #000 !important; }
+      .farm-badge { border: 1px solid #aaa !important; background: transparent !important; color: #000 !important; }
+    }
+
+    @media (max-width: 991.98px) {
+      .app-sidebar { transform: translateX(-100%); }
+      .app-sidebar.show { transform: translateX(0); box-shadow: 0 0 30px rgba(0, 0, 0, 0.25); }
+      .app-main { margin-left: 0; }
+      .sidebar-toggle-btn { display: block; }
+      .app-content { padding: 1rem; }
+      .sidebar-overlay {
+        position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0, 0, 0, 0.4); z-index: 1030; display: none;
+      }
+      .sidebar-overlay.show { display: block; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Loading Overlay -->
+  <div id="loadingOverlay" class="spinner-overlay">
+    <div class="spinner-border text-light mb-3" style="width: 3rem; height: 3rem;" role="status"></div>
+    <div id="loadingText" class="fw-medium fs-5">กำลังโหลดข้อมูลระบบ...</div>
+  </div>
+
+  <!-- Sidebar Overlay for Mobile -->
+  <div id="sidebarOverlay" class="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+  <!-- Main Application Layout -->
+  <div class="app-layout">
+    
+    <!-- Sidebar -->
+    <aside id="appSidebar" class="app-sidebar">
+      <div class="sidebar-brand">
+        <div class="brand-icon">
+          <i class="bi bi-egg-fried"></i>
+        </div>
+        <div class="brand-text">
+          <h1 id="sidebarFarmName">ฟาร์มไก่ไข่สุขใจ</h1>
+          <small>Egg Farm System</small>
+        </div>
+      </div>
+
+      <div class="sidebar-nav">
+        <div class="nav-section-title">เมนูหลัก</div>
+        
+        <a href="javascript:void(0)" class="nav-item-link active" id="navLinkDashboard" onclick="switchPage('dashboard')">
+          <i class="bi bi-grid-1x2-fill"></i>
+          <span>Dashboard</span>
+        </a>
+
+        <a href="javascript:void(0)" class="nav-item-link" id="navLinkTransactions" onclick="switchPage('transactions')">
+          <i class="bi bi-journal-check"></i>
+          <span>ระบบบันทึกรายรับ–รายจ่าย</span>
+        </a>
+
+        <a href="javascript:void(0)" class="nav-item-link" id="navLinkCctv" onclick="switchPage('cctv')">
+          <i class="bi bi-camera-video-fill"></i>
+          <span>ระบบกล้องวงจรปิด</span>
+        </a>
+
+        <div class="nav-section-title mt-4">ฐานข้อมูล & ข้อมูลระบบ</div>
+        <div class="px-3 py-2 text-muted small">
+          <div class="d-flex align-items-center gap-2 mb-2">
+            <span class="status-pulse" id="dbStatusDot"></span>
+            <span id="dbStatusText">Google Sheets พร้อมใช้งาน</span>
+          </div>
+          <div class="text-truncate text-secondary" style="font-size: 0.72rem;">
+            ID: <?= spreadsheetId ?>
+          </div>
+        </div>
+      </div>
+
+      <div class="sidebar-footer">
+        <div class="d-flex justify-content-between align-items-center">
+          <span>เวอร์ชัน 1.0.0</span>
+          <a href="https://docs.google.com/spreadsheets/d/<?= spreadsheetId ?>" target="_blank" class="text-decoration-none text-muted" title="เปิด Google Sheets">
+            <i class="bi bi-box-arrow-up-right"></i>
+          </a>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Container -->
+    <div class="app-main">
+      
+      <!-- Top Navbar -->
+      <header class="app-topbar">
+        <div class="topbar-left">
+          <button class="sidebar-toggle-btn" onclick="toggleSidebar()" aria-label="Toggle Sidebar">
+            <i class="bi bi-list"></i>
+          </button>
+          <div class="page-title-badge" id="currentPageTitle">Dashboard</div>
+        </div>
+
+        <div class="topbar-right">
+          <!-- Live Date Display (พ.ศ.) -->
+          <div class="date-badge d-none d-md-flex">
+            <i class="bi bi-calendar3"></i>
+            <span id="liveThaiDate">กำลังโหลดวันที่...</span>
+          </div>
+
+          <!-- Quick Refresh Button -->
+          <button class="btn-action-icon" onclick="refreshCurrentPage()" title="รีเฟรชข้อมูล">
+            <i class="bi bi-arrow-clockwise"></i>
+          </button>
+
+          <!-- Dark / Light Theme Toggle -->
+          <button class="theme-toggle-btn" onclick="toggleTheme()" title="เปลี่ยนโหมดการแสดงผล">
+            <i class="bi bi-moon-stars-fill" id="themeIcon"></i>
+          </button>
+        </div>
+      </header>
+
+      <!-- Dynamic Content Area -->
+      <main class="app-content">
+
+        <!-- ========================================================
+             PAGE 1: DASHBOARD
+             ======================================================== -->
+        <section id="pageDashboard" class="page-section">
+          
+          <!-- Filter Controls Bar -->
+          <div class="farm-card mb-4">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+              <div>
+                <h5 class="mb-1 fw-bold text-success-emphasis">
+                  <i class="bi bi-graph-up-arrow me-2 text-success"></i>ภาพรวมการเงินและการผลิต
+                </h5>
+                <p class="text-muted small mb-0">สรุปข้อมูลทางการเงินของฟาร์มไก่ไข่แบบอัปเดตตามรอบจริง</p>
+              </div>
+
+              <!-- Filter Buttons -->
+              <div class="d-flex flex-wrap align-items-center gap-2">
+                <div class="btn-group" role="group">
+                  <button type="button" class="btn btn-sm btn-farm-secondary period-btn" data-period="today" onclick="setDashboardPeriod('today')">วันนี้</button>
+                  <button type="button" class="btn btn-sm btn-farm-primary period-btn" data-period="this_month" onclick="setDashboardPeriod('this_month')">เดือนนี้</button>
+                  <button type="button" class="btn btn-sm btn-farm-secondary period-btn" data-period="this_year" onclick="setDashboardPeriod('this_year')">ปีนี้</button>
+                  <button type="button" class="btn btn-sm btn-farm-secondary period-btn" data-period="custom" onclick="toggleCustomDateFilter()">กำหนดช่วงวันที่</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Custom Date Range Form -->
+            <div id="customDateRangeBox" class="mt-3 pt-3 border-top d-none">
+              <div class="row g-2 align-items-end">
+                <div class="col-sm-5">
+                  <label class="form-label small">วันเริ่มต้น</label>
+                  <input type="date" class="form-control form-control-sm" id="dashStartDate">
+                </div>
+                <div class="col-sm-5">
+                  <label class="form-label small">วันสิ้นสุด</label>
+                  <input type="date" class="form-control form-control-sm" id="dashEndDate">
+                </div>
+                <div class="col-sm-2">
+                  <button class="btn btn-sm btn-farm-primary w-100" onclick="applyCustomDashboardDate()">กรองข้อมูล</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 6 Financial & Production Metric Cards -->
+          <div class="row g-3 mb-4">
+            <div class="col-12 col-sm-6 col-xl-4">
+              <div class="farm-card stat-card">
+                <div class="stat-info">
+                  <div class="stat-label">1. รายรับขายไข่ไก่รวม</div>
+                  <div class="stat-value text-success" id="cardEggIncome">0.00</div>
+                  <span class="stat-unit">บาท</span>
+                </div>
+                <div class="stat-icon-box stat-icon-income">
+                  <i class="bi bi-wallet2"></i>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-12 col-sm-6 col-xl-4">
+              <div class="farm-card stat-card">
+                <div class="stat-info">
+                  <div class="stat-label">2. ค่าใช้จ่ายรวม</div>
+                  <div class="stat-value text-danger" id="cardTotalExpense">0.00</div>
+                  <span class="stat-unit">บาท</span>
+                </div>
+                <div class="stat-icon-box stat-icon-expense">
+                  <i class="bi bi-credit-card-2-front"></i>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-12 col-sm-6 col-xl-4">
+              <div class="farm-card stat-card">
+                <div class="stat-info">
+                  <div class="stat-label">3. ยอดสุทธิ (รายรับ - รายจ่าย)</div>
+                  <div class="stat-value" id="cardNetProfit">0.00</div>
+                  <span class="stat-unit">บาท</span>
+                </div>
+                <div class="stat-icon-box" id="cardNetProfitIconBox">
+                  <i class="bi bi-cash-stack" id="cardNetProfitIcon"></i>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-12 col-sm-6 col-xl-4">
+              <div class="farm-card stat-card">
+                <div class="stat-info">
+                  <div class="stat-label">4. จำนวนแผงไข่ที่จำหน่ายรวม</div>
+                  <div class="stat-value" style="color: #B37D19;" id="cardEggTrays">0</div>
+                  <span class="stat-unit">แผง (30 ฟอง/แผง)</span>
+                </div>
+                <div class="stat-icon-box stat-icon-gold">
+                  <i class="bi bi-boxes"></i>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-12 col-sm-6 col-xl-4">
+              <div class="farm-card stat-card">
+                <div class="stat-info">
+                  <div class="stat-label">5. ค่าอาหารไก่ไข่รวม</div>
+                  <div class="stat-value" id="cardFeedExpense">0.00</div>
+                  <span class="stat-unit">บาท</span>
+                </div>
+                <div class="stat-icon-box stat-icon-expense">
+                  <i class="bi bi-basket3"></i>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-12 col-sm-6 col-xl-4">
+              <div class="farm-card stat-card">
+                <div class="stat-info">
+                  <div class="stat-label">6. ค่าฟางก้อนรวม</div>
+                  <div class="stat-value" id="cardStrawExpense">0.00</div>
+                  <span class="stat-unit">บาท</span>
+                </div>
+                <div class="stat-icon-box stat-icon-gold">
+                  <i class="bi bi-stack"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Charts Row -->
+          <div class="row g-4 mb-4">
+            <div class="col-12 col-lg-8">
+              <div class="farm-card h-100">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                  <h6 class="fw-bold mb-0">
+                    <i class="bi bi-bar-chart-line-fill text-success me-2"></i>เปรียบเทียบรายรับ–รายจ่ายรายเดือน
+                  </h6>
+                  <span class="badge badge-income">พ.ศ.</span>
+                </div>
+                <div style="position: relative; height: 280px;">
+                  <canvas id="chartMonthlyIncomeExpense"></canvas>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-12 col-lg-4">
+              <div class="farm-card h-100">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                  <h6 class="fw-bold mb-0">
+                    <i class="bi bi-pie-chart-fill text-warning me-2"></i>สัดส่วนค่าใช้จ่าย
+                  </h6>
+                </div>
+                <div style="position: relative; height: 280px;">
+                  <canvas id="chartExpenseBreakdown"></canvas>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-12">
+              <div class="farm-card">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                  <h6 class="fw-bold mb-0" style="color: #B37D19;">
+                    <i class="bi bi-graph-up text-warning me-2"></i>แนวโน้มจำนวนแผงไข่ที่จำหน่ายรายเดือน
+                  </h6>
+                  <span class="badge badge-gold">แผง</span>
+                </div>
+                <div style="position: relative; height: 240px;">
+                  <canvas id="chartMonthlyTrays"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Recent 10 Transactions Table -->
+          <div class="farm-card">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <div>
+                <h6 class="fw-bold mb-1">
+                  <i class="bi bi-clock-history me-2 text-primary"></i>10 รายการล่าสุด
+                </h6>
+                <small class="text-muted">รายการธุรกรรมที่มีการบันทึกจริงล่าสุดในระบบ</small>
+              </div>
+              <button class="btn btn-sm btn-farm-outline" onclick="switchPage('transactions')">
+                ดูทั้งหมด <i class="bi bi-arrow-right ms-1"></i>
+              </button>
+            </div>
+
+            <div class="farm-table-container">
+              <table class="table table-farm">
+                <thead>
+                  <tr>
+                    <th>ลำดับ</th>
+                    <th>วันที่ (พ.ศ.)</th>
+                    <th>ประเภทรายการ</th>
+                    <th>รายละเอียด / หมายเหตุ</th>
+                    <th class="text-end">จำนวนแผง</th>
+                    <th class="text-end">จำนวนเงิน (บาท)</th>
+                    <th>ทิศทาง</th>
+                  </tr>
+                </thead>
+                <tbody id="recentTransactionsTableBody">
+                  <tr>
+                    <td colspan="7" class="text-center py-4 text-muted">
+                      <div class="spinner-border spinner-border-sm text-success me-2"></div> กำลังโหลดข้อมูลล่าสุด...
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+
+        <!-- ========================================================
+             PAGE 2: TRANSACTIONS & RECORDING (บันทึกรายรับ-รายจ่าย)
+             ======================================================== -->
+        <section id="pageTransactions" class="page-section d-none">
+          <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+            <div>
+              <h4 class="fw-bold mb-1">ระบบบันทึกรายรับ–รายจ่าย</h4>
+              <p class="text-muted small mb-0">บันทึกข้อมูลการเงินของฟาร์มไก่ไข่ ตรวจสอบ จัดการ และพิมพ์รายงาน</p>
+            </div>
+            <div class="d-flex gap-2">
+              <button class="btn-farm-outline" onclick="openReportModal()">
+                <i class="bi bi-printer-fill"></i> พิมพ์รายงาน
+              </button>
+              <button class="btn-farm-secondary" onclick="loadTransactions(1)">
+                <i class="bi bi-arrow-clockwise"></i> รีเฟรชตาราง
+              </button>
+            </div>
+          </div>
+
+          <!-- Transaction Form Card -->
+          <div class="farm-card mb-4">
+            <div class="border-bottom pb-3 mb-4 d-flex align-items-center justify-content-between">
+              <h5 class="fw-bold mb-0 text-success">
+                <i class="bi bi-plus-circle-fill me-2"></i>แบบฟอร์มบันทึกรายการ
+              </h5>
+              <span class="badge badge-income" id="formModeBadge">บันทึกรายการใหม่</span>
+            </div>
+
+            <form id="transactionForm" onsubmit="handleFormSubmit(event)">
+              <div class="row g-3">
+                <!-- แถวที่ 1: ข้อมูลหลัก -->
+                <div class="col-12 col-md-4" id="colTransDate">
+                  <label for="transDate" class="form-label required">
+                    <i class="bi bi-calendar-event me-1 text-success"></i>วันที่บันทึก (พ.ศ.)
+                  </label>
+                  <input type="date" class="form-control" id="transDate" required onchange="updateDateDisplay()">
+                  <small class="text-muted mt-1 d-block" id="transDateDisplayThai">พ.ศ. ...</small>
+                </div>
+
+                <div class="col-12 col-md-4" id="colTransType">
+                  <label for="transType" class="form-label required">
+                    <i class="bi bi-tag-fill me-1 text-success"></i>ประเภทรายการ
+                  </label>
+                  <select class="form-select" id="transType" required onchange="handleTransactionTypeChange()">
+                    <option value="" disabled selected>-- เลือกประเภทรายการ --</option>
+                    <option value="รับค่าไข่ไก่">รับค่าไข่ไก่ (รายรับ)</option>
+                    <option value="ค่าอาหารไก่ไข่">ค่าอาหารไก่ไข่ (รายจ่าย)</option>
+                    <option value="ค่าฟางก้อน">ค่าฟางก้อน (รายจ่าย)</option>
+                    <option value="ค่าอื่น ๆ">ค่าอื่น ๆ (รายจ่าย)</option>
+                  </select>
+                </div>
+
+                <!-- Dynamic Field: จำนวนแผงไข่ (แสดงเฉพาะเมื่อเลือก รับค่าไข่ไก่) -->
+                <div class="col-12 col-md-4 d-none" id="groupEggTrays">
+                  <label for="transEggTrays" class="form-label required" style="color: #B37D19;">
+                    <i class="bi bi-boxes me-1"></i>จำนวนแผงไข่ (แผง)
+                  </label>
+                  <input type="number" step="1" min="1" class="form-control" id="transEggTrays" placeholder="เช่น 50, 100">
+                  <small class="text-muted">จำนวนเต็ม >= 1 แผง (30 ฟอง/แผง)</small>
+                </div>
+
+                <div class="col-12 col-md-4" id="colTransAmount">
+                  <label for="transAmount" class="form-label required">
+                    <i class="bi bi-currency-exchange me-1 text-success"></i>จำนวนเงิน (บาท)
+                  </label>
+                  <div class="input-group">
+                    <span class="input-group-text bg-light text-muted">฿</span>
+                    <input type="number" step="0.01" min="0.01" class="form-control text-end fw-semibold" id="transAmount" placeholder="0.00" required>
+                  </div>
+                </div>
+
+                <!-- แถวที่ 2: ช่องรายละเอียด (ซ้าย) กับ ช่องแนบภาพ (ขวา) อยู่แถวเดียวกัน -->
+                <div class="col-12 col-md-6 d-flex flex-column">
+                  <!-- Dynamic Field: รายละเอียดค่าใช้จ่ายเพิ่มเติม (แสดงเฉพาะเมื่อเลือก ค่าอื่น ๆ) -->
+                  <div class="mb-2 d-none" id="groupDetail">
+                    <label for="transDetail" class="form-label required text-danger">
+                      <i class="bi bi-pencil-square me-1"></i>รายละเอียดค่าใช้จ่ายเพิ่มเติม
+                    </label>
+                    <input type="text" class="form-control" id="transDetail" placeholder="ระบุรายละเอียด เช่น ค่าวัคซีน, ค่าซ่อมกรง, ค่าไฟฟ้า">
+                  </div>
+
+                  <label for="transNote" class="form-label">
+                    <i class="bi bi-chat-left-text me-1 text-muted"></i>รายละเอียด / หมายเหตุ
+                  </label>
+                  <textarea class="form-control flex-grow-1" id="transNote" rows="3" maxlength="300" placeholder="ระบุรายละเอียดเพิ่มเติม (ถ้ามี) เช่น ชื่อร้านค้า, หมายเลขสลิป"></textarea>
+                </div>
+
+                <!-- ช่องแนบไฟล์ภาพ (อยู่แถวเดียวกันกับรายละเอียด) -->
+                <div class="col-12 col-md-6 d-flex flex-column">
+                  <label class="form-label">
+                    <i class="bi bi-image me-1 text-muted"></i>แนบรูปภาพใบเสร็จ / หลักฐาน (ไม่เกิน 5 MB)
+                  </label>
+                  <div class="upload-dropzone flex-grow-1" onclick="document.getElementById('transFileInput').click()">
+                    <i class="bi bi-cloud-arrow-up text-success fs-1 mb-1"></i>
+                    <p class="mb-1 fw-medium">คลิกเลือกรูปภาพ หรือ ลากไฟล์มาวางที่นี่</p>
+                    <small class="text-muted">รองรับไฟล์ JPG, JPEG, PNG, WEBP (บันทึกลง Google Drive ปลอดภัย)</small>
+                    <input type="file" id="transFileInput" class="d-none" accept="image/jpeg,image/png,image/webp" onchange="handleFileSelect(event)">
+                  </div>
+
+                  <div id="imagePreviewContainer" class="d-none mt-2">
+                    <div class="image-preview-wrapper">
+                      <img id="imagePreviewImg" src="" alt="ตัวอย่างรูปภาพ">
+                      <button type="button" class="btn-remove-preview" onclick="clearSelectedFile()" title="ลบภาพที่เลือก">
+                        <i class="bi bi-x"></i>
+                      </button>
+                    </div>
+                    <div class="small text-muted mt-1" id="imageFileName"></div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
+                <button type="button" class="btn-farm-secondary" onclick="resetTransactionForm()">
+                  <i class="bi bi-arrow-counterclockwise"></i> ล้างข้อมูล
+                </button>
+                <button type="submit" class="btn-farm-primary" id="btnSubmitTransaction">
+                  <i class="bi bi-save2-fill"></i> บันทึกข้อมูล
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Transactions Table & Filters -->
+          <div class="farm-card">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
+              <div>
+                <h5 class="fw-bold mb-1">
+                  <i class="bi bi-table text-success me-2"></i>ตารางรายการที่บันทึก
+                </h5>
+                <small class="text-muted">รายการทั้งหมดจาก Google Sheets เรียงจากล่าสุดไปอดีต</small>
+              </div>
+
+              <div class="d-flex flex-wrap align-items-center gap-2">
+                <input type="text" class="form-control form-control-sm" id="tableSearchInput" placeholder="ค้นหาข้อความ, ยอดเงิน..." style="width: 180px;" oninput="debounceSearch()">
+                <select class="form-select form-select-sm" id="tableFilterType" style="width: 150px;" onchange="loadTransactions(1)">
+                  <option value="">ทุกประเภท</option>
+                  <option value="รับค่าไข่ไก่">รับค่าไข่ไก่</option>
+                  <option value="ค่าอาหารไก่ไข่">ค่าอาหารไก่ไข่</option>
+                  <option value="ค่าฟางก้อน">ค่าฟางก้อน</option>
+                  <option value="ค่าอื่น ๆ">ค่าอื่น ๆ</option>
+                </select>
+                <input type="month" class="form-control form-control-sm" id="tableFilterMonth" style="width: 140px;" onchange="loadTransactions(1)">
+              </div>
+            </div>
+
+            <div class="d-flex flex-wrap gap-3 py-2 px-3 mb-3 rounded-3" style="background-color: var(--farm-primary-light);">
+              <div class="small"><strong>รายการทั้งหมด:</strong> <span id="chipTotalCount">0</span> รายการ</div>
+              <div class="small text-success"><strong>รายรับรวม:</strong> <span id="chipTotalIncome">0.00</span> บาท</div>
+              <div class="small text-danger"><strong>รายจ่ายรวม:</strong> <span id="chipTotalExpense">0.00</span> บาท</div>
+              <div class="small fw-bold"><strong>ยอดสุทธิ:</strong> <span id="chipNetBalance">0.00</span> บาท</div>
+              <div class="small" style="color: #B37D19;"><strong>แผงไข่รวม:</strong> <span id="chipTotalTrays">0</span> แผง</div>
+            </div>
+
+            <div class="farm-table-container">
+              <table class="table table-farm">
+                <thead>
+                  <tr>
+                    <th>ลำดับ</th>
+                    <th>วันที่บันทึก (พ.ศ.)</th>
+                    <th>ประเภทรายการ</th>
+                    <th>รายละเอียดเพิ่มเติม</th>
+                    <th class="text-end">จำนวนแผง</th>
+                    <th class="text-end">จำนวนเงิน (บาท)</th>
+                    <th>หมายเหตุ</th>
+                    <th class="text-center">ไฟล์แนบ</th>
+                    <th class="text-center">จัดการ</th>
+                  </tr>
+                </thead>
+                <tbody id="transactionsTableBody">
+                  <tr>
+                    <td colspan="9" class="text-center py-4 text-muted">กำลังโหลดข้อมูลรายการ...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mt-3 pt-3 border-top">
+              <div class="small text-muted" id="tablePaginationInfo">แสดง 0 - 0 จาก 0 รายการ</div>
+              <div class="d-flex align-items-center gap-1" id="tablePaginationControls"></div>
+            </div>
+          </div>
+        </section>
+
+
+        <!-- ========================================================
+             PAGE 3: CCTV (ระบบกล้องวงจรปิด XIAOMI C300)
+             ======================================================== -->
+        <section id="pageCctv" class="page-section d-none">
+          <div class="farm-card mb-4">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+              <div>
+                <h4 class="fw-bold mb-1">
+                  <i class="bi bi-camera-video text-success me-2"></i>ระบบกล้องวงจรปิดฟาร์ม (Xiaomi Smart Camera C300)
+                </h4>
+                <p class="text-muted small mb-0">ระบบสังเกตการณ์โรงเรือนเลี้ยงไก่ไข่เพื่อความปลอดภัยและติดตามผลผลิต</p>
+              </div>
+              <div class="d-flex align-items-center gap-2">
+                <span class="status-pulse" id="cctvStatusDot"></span>
+                <span class="small fw-medium" id="cctvStatusBadge">ตรวจสอบสถานะ...</span>
+                <button class="btn btn-sm btn-farm-secondary ms-2" onclick="refreshCctvStatus()">
+                  <i class="bi bi-arrow-clockwise"></i> รีเฟรช
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="row g-4 mb-4">
+            <div class="col-12 col-lg-8">
+              <div class="cctv-stage" id="cctvPlayerStage">
+                <div class="cctv-overlay-status">
+                  <span class="status-pulse" id="cctvVideoDot"></span>
+                  <span id="cctvVideoStatusText">Xiaomi C300 - โหมดแอปพลิเคชัน</span>
+                </div>
+                <video id="cctvVideoPlayer" class="cctv-video d-none" controls autoplay muted playsinline></video>
+                <div id="cctvPlaceholder" class="text-center p-4">
+                  <i class="bi bi-shield-lock-fill text-success" style="font-size: 4rem;"></i>
+                  <h5 class="fw-bold mt-3 mb-2">Xiaomi Smart Camera C300</h5>
+                  <p class="text-light opacity-75 small mb-3" style="max-width: 480px; margin: 0 auto;">
+                    กล้อง Xiaomi C300 มีระบบรักษาความปลอดภัยและการเข้ารหัสผ่าน Xiaomi Cloud <br>
+                    แนะนำให้รับชมผ่านแอป <strong>Xiaomi Home</strong> หรือเชื่อมต่อผ่าน <strong>Video Gateway (HTTPS HLS)</strong>
+                  </p>
+                  <div class="d-flex justify-content-center gap-2 flex-wrap">
+                    <button class="btn btn-warning fw-semibold" onclick="openXiaomiHomeApp()">
+                      <i class="bi bi-phone-fill me-1"></i> เปิดในแอป Xiaomi Home
+                    </button>
+                    <button class="btn btn-outline-light" onclick="scrollToGatewaySettings()">
+                      <i class="bi bi-gear-fill me-1"></i> ตั้งค่า Video Gateway
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-12 col-lg-4">
+              <div class="farm-card h-100 d-flex flex-column justify-content-between">
+                <div>
+                  <h6 class="fw-bold mb-3 text-success">
+                    <i class="bi bi-info-circle-fill me-2"></i>ข้อมูลกล้อง & การเข้าถึง
+                  </h6>
+                  <ul class="list-unstyled small mb-4">
+                    <li class="mb-2 pb-2 border-bottom"><strong>รุ่น:</strong> Xiaomi Smart Camera C300</li>
+                    <li class="mb-2 pb-2 border-bottom"><strong>ความละเอียด:</strong> 2K (2304 × 1296 พิกเซล)</li>
+                    <li class="mb-2 pb-2 border-bottom"><strong>มุมมอง:</strong> หมุน 360° แนวนอน / 108° แนวตั้ง</li>
+                    <li class="mb-2 pb-2 border-bottom"><strong>ระบบส่งข้อมูล:</strong> Xiaomi Cloud Encryption</li>
+                    <li class="mb-2"><strong>สิทธิ์การเข้าถึง:</strong> ผูกกับ Mi Account ประจำฟาร์ม</li>
+                  </ul>
+                  <div class="alert alert-success border-0 small py-2 mb-3">
+                    <i class="bi bi-shield-check me-1"></i> ระบบปลอดภัยสูง ไม่เปิดพอร์ตสู่สาธารณะโดยไม่ได้รับอนุญาต
+                  </div>
+                </div>
+                <div>
+                  <button class="btn-farm-primary w-100 justify-content-center" onclick="openXiaomiHomeApp()">
+                    <i class="bi bi-box-arrow-up-right me-1"></i> เปิดแอป Xiaomi Home ทันที
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="farm-card mb-4" id="gatewaySettingsSection">
+            <h5 class="fw-bold mb-3 text-success">
+              <i class="bi bi-sliders2 me-2"></i>ตัวเลือกการเชื่อมต่อกล้องวงจรปิด
+            </h5>
+            <div class="row g-4">
+              <div class="col-12 col-md-6">
+                <div class="p-3 rounded-3 border h-100" style="background-color: var(--farm-bg);">
+                  <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="badge badge-income">รูปแบบ A (วิธีหลัก)</span>
+                    <h6 class="fw-bold mb-0">แอปพลิเคชัน Xiaomi Home</h6>
+                  </div>
+                  <p class="text-muted small mb-3">
+                    รับชมภาพสดพร้อมฟังก์ชันหมุนกล้อง 360° พูดคุยสองทาง และดูย้อนหลังผ่านแอปอย่างเสถียร
+                  </p>
+                  <div class="d-flex gap-2">
+                    <a href="https://play.google.com/store/apps/details?id=com.xiaomi.smarthome" target="_blank" class="btn btn-sm btn-outline-secondary">
+                      <i class="bi bi-google-play me-1"></i> Android
+                    </a>
+                    <a href="https://apps.apple.com/app/mi-home-xiaomi-smarthome/id957323480" target="_blank" class="btn btn-sm btn-outline-secondary">
+                      <i class="bi bi-apple me-1"></i> iOS
+                    </a>
+                    <button class="btn btn-sm btn-warning text-dark fw-medium ms-auto" onclick="openXiaomiHomeApp()">เปิดแอป</button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-12 col-md-6">
+                <div class="p-3 rounded-3 border h-100" style="background-color: var(--farm-bg);">
+                  <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="badge badge-gold">รูปแบบ B (ขั้นสูง)</span>
+                    <h6 class="fw-bold mb-0">Video Gateway (HTTPS HLS)</h6>
+                  </div>
+                  <p class="text-muted small mb-3">
+                    สำหรับกรณีที่มีเกตเวย์รับสตรีม เช่น go2rtc, RTSP-to-Web หรือ Home Assistant Proxy ที่แปลงเป็น HLS ได้รับอนุญาต
+                  </p>
+                  <div class="input-group input-group-sm mb-2">
+                    <input type="url" class="form-control" id="cameraGatewayInput" placeholder="https://your-gateway.domain/stream.m3u8">
+                    <button class="btn btn-farm-primary" onclick="saveGatewaySetting()">บันทึก</button>
+                  </div>
+                  <small class="text-muted d-block">ต้องเป็น HTTPS และตั้งค่า CORS อนุญาต Web App</small>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+
+  <!-- MODALS -->
+  <!-- 1. Edit Transaction Modal -->
+  <div class="modal fade" id="modalEditTransaction" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
+        <div class="modal-header bg-light">
+          <h5 class="modal-title fw-bold text-success">
+            <i class="bi bi-pencil-square me-2"></i>แก้ไขรายการบัญชี
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4">
+          <form id="editTransactionForm" onsubmit="handleEditFormSubmit(event)">
+            <input type="hidden" id="editRecordId">
+            <input type="hidden" id="editOriginalAttachmentId">
+
+            <div class="row g-3">
+              <div class="col-12 col-md-4" id="editColDate">
+                <label class="form-label required">วันที่บันทึก (พ.ศ.)</label>
+                <input type="date" class="form-control" id="editTransDate" required>
+              </div>
+
+              <div class="col-12 col-md-4" id="editColType">
+                <label class="form-label required">ประเภทรายการ</label>
+                <select class="form-select" id="editTransType" required onchange="handleEditTypeChange()">
+                  <option value="รับค่าไข่ไก่">รับค่าไข่ไก่ (รายรับ)</option>
+                  <option value="ค่าอาหารไก่ไข่">ค่าอาหารไก่ไข่ (รายจ่าย)</option>
+                  <option value="ค่าฟางก้อน">ค่าฟางก้อน (รายจ่าย)</option>
+                  <option value="ค่าอื่น ๆ">ค่าอื่น ๆ (รายจ่าย)</option>
+                </select>
+              </div>
+
+              <div class="col-12 col-md-4 d-none" id="editGroupEggTrays">
+                <label class="form-label required" style="color: #B37D19;">จำนวนแผงไข่ (แผง)</label>
+                <input type="number" step="1" min="1" class="form-control" id="editEggTrays">
+              </div>
+
+              <div class="col-12 col-md-4" id="editColAmount">
+                <label class="form-label required">จำนวนเงิน (บาท)</label>
+                <input type="number" step="0.01" min="0.01" class="form-control fw-semibold" id="editAmount" required>
+              </div>
+
+              <!-- แถวที่ 2: รายละเอียด (ซ้าย) กับ แนบภาพ (ขวา) อยู่แถวเดียวกัน -->
+              <div class="col-12 col-md-6 d-flex flex-column">
+                <div class="mb-2 d-none" id="editGroupDetail">
+                  <label class="form-label required text-danger">รายละเอียดค่าใช้จ่ายเพิ่มเติม</label>
+                  <input type="text" class="form-control" id="editDetail">
+                </div>
+
+                <label class="form-label">รายละเอียด / หมายเหตุ</label>
+                <textarea class="form-control flex-grow-1" id="editNote" rows="3" maxlength="300"></textarea>
+              </div>
+
+              <div class="col-12 col-md-6 d-flex flex-column">
+                <label class="form-label">ไฟล์แนบภาพ</label>
+                <div id="editCurrentAttachmentBox" class="mb-2">
+                  <span class="badge bg-secondary me-2">ไฟล์เดิม</span>
+                  <span id="editCurrentAttachmentText" class="small text-muted">ไม่มีไฟล์แนบ</span>
+                </div>
+                <div class="input-group">
+                  <input type="file" class="form-control" id="editFileInput" accept="image/jpeg,image/png,image/webp">
+                </div>
+                <small class="text-muted mt-1">เลือกภาพใหม่หากต้องการเปลี่ยน (หากไม่เลือกจะยังคงใช้ไฟล์เดิม)</small>
+              </div>
+            </div>
+
+            <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ยกเลิก</button>
+              <button type="submit" class="btn btn-farm-primary" id="btnSubmitEdit">บันทึกการแก้ไข</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Delete Confirmation Modal -->
+  <div class="modal fade" id="modalDeleteConfirm" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow" style="border-radius: 16px;">
+        <div class="modal-header border-0 pb-0">
+          <h5 class="modal-title fw-bold text-danger">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>ยืนยันการลบรายการ
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body py-3">
+          <p class="mb-2">คุณแน่ใจหรือไม่ว่าต้องการลบรายการนี้?</p>
+          <div class="p-3 rounded-3 bg-light border small">
+            <div><strong>วันที่:</strong> <span id="delConfirmDate">-</span></div>
+            <div><strong>ประเภท:</strong> <span id="delConfirmType">-</span></div>
+            <div><strong>จำนวนเงิน:</strong> <span id="delConfirmAmount" class="fw-bold text-danger">-</span> บาท</div>
+            <div><strong>รายละเอียด:</strong> <span id="delConfirmDetail">-</span></div>
+          </div>
+          <p class="text-muted small mt-2 mb-0">
+            * การลบจะทำแบบ Soft Delete (ซ่อนจากตารางและรายงาน) และยังคงรักษาประวัติไว้ในระบบ
+          </p>
+        </div>
+        <div class="modal-footer border-0 pt-0">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ยกเลิก</button>
+          <button type="button" class="btn btn-danger" id="btnConfirmDelete" onclick="executeDeleteTransaction()">
+            <i class="bi bi-trash-fill me-1"></i> ยืนยันการลบ
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. Image Preview Modal -->
+  <div class="modal fade" id="modalImagePreview" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content border-0 bg-dark text-white" style="border-radius: 16px; overflow: hidden;">
+        <div class="modal-header border-0">
+          <h6 class="modal-title fw-bold text-white" id="imagePreviewTitle">หลักฐานการทำรายการ</h6>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-0 text-center" style="background: #000; min-height: 300px; display: flex; align-items: center; justify-content: center;">
+          <div id="imagePreviewLoading" class="p-4">
+            <div class="spinner-border text-light" role="status"></div>
+            <div class="small mt-2 text-white-50">กำลังดึงภาพจาก Google Drive...</div>
+          </div>
+          <img id="imagePreviewFull" src="" alt="ไฟล์แนบ" class="img-fluid d-none" style="max-height: 80vh;">
+        </div>
+        <div class="modal-footer border-0 py-2">
+          <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">ปิด</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. Report Options Modal -->
+  <div class="modal fade" id="modalReportOptions" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
+        <div class="modal-header bg-light">
+          <h5 class="modal-title fw-bold text-success">
+            <i class="bi bi-printer-fill me-2"></i>พิมพ์รายงานรายรับ–รายจ่าย
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4">
+          <div class="row g-3">
+            <div class="col-12 col-sm-6">
+              <label class="form-label small">วันเริ่มต้น</label>
+              <input type="date" class="form-control" id="reportStartDate">
+            </div>
+            <div class="col-12 col-sm-6">
+              <label class="form-label small">วันสิ้นสุด</label>
+              <input type="date" class="form-control" id="reportEndDate">
+            </div>
+            <div class="col-12">
+              <label class="form-label small">ประเภทรายการที่ต้องการพิมพ์</label>
+              <select class="form-select" id="reportTransactionType">
+                <option value="ALL">พิมพ์ทุกประเภทรายการ (ทั้งหมด)</option>
+                <option value="รับค่าไข่ไก่">เฉพาะรับค่าไข่ไก่ (รายรับ)</option>
+                <option value="ค่าอาหารไก่ไข่">เฉพาะค่าอาหารไก่ไข่ (รายจ่าย)</option>
+                <option value="ค่าฟางก้อน">เฉพาะค่าฟางก้อน (รายจ่าย)</option>
+                <option value="ค่าอื่น ๆ">เฉพาะค่าอื่น ๆ (รายจ่าย)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer bg-light border-0">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ยกเลิก</button>
+          <button type="button" class="btn btn-farm-primary" onclick="generateAndPrintReport()">
+            <i class="bi bi-file-earmark-pdf-fill me-1"></i> สร้างและพิมพ์รายงาน (A4)
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. Printable A4 Sheet -->
+  <div id="printReportSheet" class="print-sheet d-none">
+    <div class="text-center mb-4 pb-2 border-bottom">
+      <h2 class="fw-bold mb-1" id="printReportFarmName">ฟาร์มไก่ไข่สุขใจ</h2>
+      <h4 class="mb-2">รายงานรายรับ–รายจ่าย</h4>
+      <div class="text-muted small">
+        ช่วงวันที่: <span id="printReportDateRange" class="fw-semibold">-</span> | 
+        ประเภท: <span id="printReportType" class="fw-semibold">-</span>
+      </div>
+    </div>
+
+    <div class="row g-2 mb-4">
+      <div class="col-3 p-2 border text-center rounded">
+        <small class="text-muted d-block">รวมรายรับ</small>
+        <span class="fw-bold fs-6 text-success" id="printSumIncome">0.00 บาท</span>
+      </div>
+      <div class="col-3 p-2 border text-center rounded">
+        <small class="text-muted d-block">รวมรายจ่าย</small>
+        <span class="fw-bold fs-6 text-danger" id="printSumExpense">0.00 บาท</span>
+      </div>
+      <div class="col-3 p-2 border text-center rounded">
+        <small class="text-muted d-block">ยอดสุทธิ</small>
+        <span class="fw-bold fs-6" id="printSumNet">0.00 บาท</span>
+      </div>
+      <div class="col-3 p-2 border text-center rounded">
+        <small class="text-muted d-block">จำนวนแผงไข่รวม</small>
+        <span class="fw-bold fs-6" id="printSumTrays">0 แผง</span>
+      </div>
+    </div>
+
+    <table class="table table-bordered table-sm table-farm mb-4">
+      <thead>
+        <tr>
+          <th style="width: 5%;">ลำดับ</th>
+          <th style="width: 15%;">วันที่ (พ.ศ.)</th>
+          <th style="width: 18%;">ประเภทรายการ</th>
+          <th style="width: 25%;">รายละเอียด</th>
+          <th style="width: 12%; text-align: right;">จำนวนแผง</th>
+          <th style="width: 15%; text-align: right;">จำนวนเงิน (บาท)</th>
+          <th style="width: 10%;">หมายเหตุ</th>
+        </tr>
+      </thead>
+      <tbody id="printReportTableBody"></tbody>
+    </table>
+
+    <div class="d-flex justify-content-between align-items-center mt-5 pt-3 border-top small text-muted">
+      <div>พิมพ์เมื่อ: <span id="printReportGeneratedDate">-</span></div>
+      <div>ผู้จัดทำ: เจ้าหน้าที่ผู้มีอำนาจประจำฟาร์ม (ลงชื่อ)........................................................</div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 99999;">
+    <div id="appToast" class="toast align-items-center border-0 text-white" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="d-flex">
+        <div class="toast-body d-flex align-items-center gap-2" id="toastMessage">
+          <i class="bi bi-info-circle-fill" id="toastIcon"></i>
+          <span id="toastText">ข้อความแจ้งเตือน</span>
+        </div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap 5 Bundle JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Complete Inlined Client Scripts -->
+  <script>
+    const state = {
+      currentPage: 'dashboard',
+      dashboardPeriod: 'this_month',
+      dashboardFilters: { period: 'this_month', startDate: '', endDate: '' },
+      transactionsPage: 1,
+      transactionsPageSize: 10,
+      transactionsFilters: { search: '', type: '', monthYear: '' },
+      selectedFile: null,
+      editSelectedFile: null,
+      currentEditingRecord: null,
+      deletingRecordId: null,
+      charts: { monthly: null, expenseBreakdown: null, trays: null },
+      hlsPlayer: null,
+      isSubmitting: false,
+      searchDebounceTimer: null
+    };
+
+    const THAI_MONTHS_SHORT = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+    const THAI_MONTHS_FULL = ['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'];
+    const THAI_DAYS = ['วันอาทิตย์', 'วันจันทร์', 'วันอังคาร', 'วันพุธ', 'วันพฤหัสบดี', 'วันศุกร์', 'วันเสาร์'];
+
+    document.addEventListener('DOMContentLoaded', function () {
+      initTheme();
+      initLiveThaiDate();
+      initDefaultDates();
+      checkDatabaseConnection();
+      loadDashboard();
+    });
+
+    function initTheme() {
+      const savedTheme = localStorage.getItem('farm_theme') || 'light';
+      document.documentElement.setAttribute('data-bs-theme', savedTheme);
+      updateThemeIcon(savedTheme);
+    }
+
+    function toggleTheme() {
+      const currentTheme = document.documentElement.getAttribute('data-bs-theme');
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-bs-theme', newTheme);
+      localStorage.setItem('farm_theme', newTheme);
+      updateThemeIcon(newTheme);
+      if (state.charts.monthly) loadDashboard();
+    }
+
+    function updateThemeIcon(theme) {
+      const icon = document.getElementById('themeIcon');
+      if (icon) {
+        icon.className = theme === 'dark' ? 'bi bi-sun-fill text-warning' : 'bi bi-moon-stars-fill';
+      }
+    }
+
+    function toggleSidebar() {
+      const sidebar = document.getElementById('appSidebar');
+      const overlay = document.getElementById('sidebarOverlay');
+      if (sidebar && overlay) {
+        sidebar.classList.toggle('show');
+        overlay.classList.toggle('show');
+      }
+    }
+
+    function closeSidebarMobile() {
+      const sidebar = document.getElementById('appSidebar');
+      const overlay = document.getElementById('sidebarOverlay');
+      if (sidebar && overlay && window.innerWidth < 992) {
+        sidebar.classList.remove('show');
+        overlay.classList.remove('show');
+      }
+    }
+
+    function switchPage(pageId) {
+      state.currentPage = pageId;
+      closeSidebarMobile();
+      document.querySelectorAll('.nav-item-link').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.page-section').forEach(el => el.classList.add('d-none'));
+
+      const titleBadge = document.getElementById('currentPageTitle');
+      if (pageId === 'dashboard') {
+        document.getElementById('navLinkDashboard').classList.add('active');
+        document.getElementById('pageDashboard').classList.remove('d-none');
+        titleBadge.textContent = 'Dashboard';
+        loadDashboard();
+      } else if (pageId === 'transactions') {
+        document.getElementById('navLinkTransactions').classList.add('active');
+        document.getElementById('pageTransactions').classList.remove('d-none');
+        titleBadge.textContent = 'ระบบบันทึกรายรับ–รายจ่าย';
+        loadTransactions(1);
+      } else if (pageId === 'cctv') {
+        document.getElementById('navLinkCctv').classList.add('active');
+        document.getElementById('pageCctv').classList.remove('d-none');
+        titleBadge.textContent = 'ระบบกล้องวงจรปิด';
+        loadCctv();
+      }
+    }
+
+    function refreshCurrentPage() {
+      if (state.currentPage === 'dashboard') loadDashboard();
+      else if (state.currentPage === 'transactions') loadTransactions(state.transactionsPage);
+      else if (state.currentPage === 'cctv') loadCctv();
+      showToast('รีเฟรชข้อมูลเรียบร้อย', 'info');
+    }
+
+    function initLiveThaiDate() {
+      const now = new Date();
+      const dayName = THAI_DAYS[now.getDay()];
+      const dateNum = now.getDate();
+      const monthName = THAI_MONTHS_FULL[now.getMonth()];
+      const yearBe = now.getFullYear() + 543;
+      const el = document.getElementById('liveThaiDate');
+      if (el) el.textContent = `${dayName}ที่ ${dateNum} ${monthName} ${yearBe}`;
+    }
+
+    function initDefaultDates() {
+      const now = new Date();
+      const todayIso = formatIsoDate(now);
+      const transDateInput = document.getElementById('transDate');
+      if (transDateInput) {
+        transDateInput.value = todayIso;
+        updateDateDisplay();
+      }
+      const repStart = document.getElementById('reportStartDate');
+      const repEnd = document.getElementById('reportEndDate');
+      if (repStart && repEnd) {
+        const firstDayMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+        repStart.value = formatIsoDate(firstDayMonth);
+        repEnd.value = todayIso;
+      }
+    }
+
+    function formatIsoDate(d) {
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+
+    function formatToThaiBE(isoDate, fullMonth = false) {
+      if (!isoDate || isoDate.length < 10) return '-';
+      const parts = isoDate.substring(0, 10).split('-');
+      const yearCe = parseInt(parts[0], 10);
+      const monthIdx = parseInt(parts[1], 10) - 1;
+      const day = parseInt(parts[2], 10);
+      const yearBe = yearCe + 543;
+      const monthStr = fullMonth ? THAI_MONTHS_FULL[monthIdx] : THAI_MONTHS_SHORT[monthIdx];
+      return `${day} ${monthStr} ${yearBe}`;
+    }
+
+    function updateDateDisplay() {
+      const val = document.getElementById('transDate').value;
+      const display = document.getElementById('transDateDisplayThai');
+      if (val) display.textContent = `ตรงกับ: ${formatToThaiBE(val, true)}`;
+      else display.textContent = 'กรุณาเลือกวันที่';
+    }
+
+    function checkDatabaseConnection() {
+      google.script.run
+        .withSuccessHandler(function (res) {
+          const dot = document.getElementById('dbStatusDot');
+          const text = document.getElementById('dbStatusText');
+          if (res && res.success) {
+            if (dot) dot.className = 'status-pulse';
+            if (text) text.textContent = 'Google Sheets เชื่อมต่อสมบูรณ์';
+          } else {
+            if (dot) dot.className = 'status-pulse offline';
+            if (text) text.textContent = 'เชื่อมต่อฐานข้อมูลล้มเหลว';
+            showToast(res.message || 'ไม่สามารถเข้าถึง Google Sheets ได้', 'danger');
+          }
+        })
+        .withFailureHandler(function (err) {
+          const dot = document.getElementById('dbStatusDot');
+          const text = document.getElementById('dbStatusText');
+          if (dot) dot.className = 'status-pulse offline';
+          if (text) text.textContent = 'ข้อผิดพลาดระบบเครือข่าย';
+          showToast('ไม่สามารถเชื่อมต่อ Google Apps Script: ' + err.message, 'danger');
+        })
+        .apiSetupDatabase();
+    }
+
+    function setDashboardPeriod(period) {
+      state.dashboardPeriod = period;
+      state.dashboardFilters.period = period;
+      document.querySelectorAll('.period-btn').forEach(btn => {
+        btn.classList.remove('btn-farm-primary');
+        btn.classList.add('btn-farm-secondary');
+      });
+      const activeBtn = document.querySelector(`.period-btn[data-period="${period}"]`);
+      if (activeBtn) {
+        activeBtn.classList.remove('btn-farm-secondary');
+        activeBtn.classList.add('btn-farm-primary');
+      }
+      const customBox = document.getElementById('customDateRangeBox');
+      if (period === 'custom') {
+        customBox.classList.remove('d-none');
+      } else {
+        customBox.classList.add('d-none');
+        loadDashboard();
+      }
+    }
+
+    function toggleCustomDateFilter() { setDashboardPeriod('custom'); }
+
+    function applyCustomDashboardDate() {
+      const start = document.getElementById('dashStartDate').value;
+      const end = document.getElementById('dashEndDate').value;
+      if (!start || !end) {
+        showToast('กรุณาระบุวันเริ่มต้นและวันสิ้นสุดให้ครบถ้วน', 'warning');
+        return;
+      }
+      if (start > end) {
+        showToast('วันเริ่มต้นต้องไม่มากกว่าวันสิ้นสุด', 'warning');
+        return;
+      }
+      state.dashboardFilters.startDate = start;
+      state.dashboardFilters.endDate = end;
+      loadDashboard();
+    }
+
+    function loadDashboard() {
+      showLoading('กำลังโหลดข้อมูลสรุป Dashboard...');
+      google.script.run
+        .withSuccessHandler(function (res) {
+          hideLoading();
+          if (!res || !res.success) {
+            showToast(res ? res.message : 'โหลดข้อมูล Dashboard ไม่สำเร็จ', 'danger');
+            return;
+          }
+          renderDashboardCards(res.cards);
+          renderDashboardCharts(res.charts);
+          renderRecentTransactions(res.recentTransactions);
+        })
+        .withFailureHandler(function (err) {
+          hideLoading();
+          showToast('เกิดข้อผิดพลาดในการโหลด Dashboard: ' + err.message, 'danger');
+        })
+        .apiGetDashboardData(state.dashboardFilters);
+    }
+
+    function renderDashboardCards(cards) {
+      if (!cards) return;
+      document.getElementById('cardEggIncome').textContent = formatCurrency(cards.totalEggIncome);
+      document.getElementById('cardTotalExpense').textContent = formatCurrency(cards.totalExpense);
+      
+      const netEl = document.getElementById('cardNetProfit');
+      const netBox = document.getElementById('cardNetProfitIconBox');
+      const net = cards.netProfit || 0;
+      netEl.textContent = formatCurrency(net);
+
+      if (net >= 0) {
+        netEl.className = 'stat-value text-success';
+        netBox.className = 'stat-icon-box stat-icon-income';
+      } else {
+        netEl.className = 'stat-value text-danger';
+        netBox.className = 'stat-icon-box stat-icon-expense';
+      }
+
+      document.getElementById('cardEggTrays').textContent = formatNumber(cards.totalEggTrays);
+      document.getElementById('cardFeedExpense').textContent = formatCurrency(cards.totalFeedExpense);
+      document.getElementById('cardStrawExpense').textContent = formatCurrency(cards.totalStrawExpense);
+    }
+
+    function renderDashboardCharts(chartsData) {
+      if (!chartsData) return;
+      const isDark = document.documentElement.getAttribute('data-bs-theme') === 'dark';
+      const textColor = isDark ? '#E3EDE7' : '#25352D';
+      const gridColor = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)';
+
+      const ctxMonthly = document.getElementById('chartMonthlyIncomeExpense');
+      if (ctxMonthly) {
+        if (state.charts.monthly) state.charts.monthly.destroy();
+        state.charts.monthly = new Chart(ctxMonthly, {
+          type: 'bar',
+          data: {
+            labels: chartsData.monthly.labels,
+            datasets: [
+              { label: 'รายรับ (บาท)', data: chartsData.monthly.income, backgroundColor: '#16845B', borderRadius: 6 },
+              { label: 'รายจ่าย (บาท)', data: chartsData.monthly.expense, backgroundColor: '#D9534F', borderRadius: 6 }
+            ]
+          },
+          options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: {
+              legend: { labels: { color: textColor, font: { family: 'Prompt' } } },
+              tooltip: { callbacks: { label: (i) => `${i.dataset.label}: ${formatCurrency(i.raw)} บาท` } }
+            },
+            scales: {
+              x: { ticks: { color: textColor, font: { family: 'Prompt' } }, grid: { display: false } },
+              y: { ticks: { color: textColor, font: { family: 'Prompt' } }, grid: { color: gridColor } }
+            }
+          }
+        });
+      }
+
+      const ctxExpense = document.getElementById('chartExpenseBreakdown');
+      if (ctxExpense) {
+        if (state.charts.expenseBreakdown) state.charts.expenseBreakdown.destroy();
+        const expenseSum = chartsData.expenseBreakdown.data.reduce((a, b) => a + b, 0);
+        const hasData = expenseSum > 0;
+
+        state.charts.expenseBreakdown = new Chart(ctxExpense, {
+          type: 'doughnut',
+          data: {
+            labels: hasData ? chartsData.expenseBreakdown.labels : ['ไม่มีค่าใช้จ่าย'],
+            datasets: [{
+              data: hasData ? chartsData.expenseBreakdown.data : [1],
+              backgroundColor: hasData ? ['#16845B', '#F2B84B', '#6C757D'] : ['#E2ECE5'],
+              borderWidth: 2,
+              borderColor: isDark ? '#1B2620' : '#FFFFFF'
+            }]
+          },
+          options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: {
+              legend: { position: 'bottom', labels: { color: textColor, font: { family: 'Prompt' } } },
+              tooltip: { enabled: hasData, callbacks: { label: (i) => `${i.label}: ${formatCurrency(i.raw)} บาท` } }
+            },
+            cutout: '65%'
+          }
+        });
+      }
+
+      const ctxTrays = document.getElementById('chartMonthlyTrays');
+      if (ctxTrays) {
+        if (state.charts.trays) state.charts.trays.destroy();
+        state.charts.trays = new Chart(ctxTrays, {
+          type: 'line',
+          data: {
+            labels: chartsData.monthly.labels,
+            datasets: [{
+              label: 'จำนวนแผงไข่ (แผง)',
+              data: chartsData.monthly.trays,
+              borderColor: '#B37D19',
+              backgroundColor: 'rgba(242, 184, 75, 0.15)',
+              fill: true,
+              tension: 0.35,
+              pointBackgroundColor: '#F2B84B',
+              pointRadius: 5
+            }]
+          },
+          options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: {
+              legend: { labels: { color: textColor, font: { family: 'Prompt' } } },
+              tooltip: { callbacks: { label: (i) => `จำหน่ายได้: ${formatNumber(i.raw)} แผง` } }
+            },
+            scales: {
+              x: { ticks: { color: textColor, font: { family: 'Prompt' } }, grid: { display: false } },
+              y: { ticks: { color: textColor, font: { family: 'Prompt' }, precision: 0 }, grid: { color: gridColor }, beginAtZero: true }
+            }
+          }
+        });
+      }
+    }
+
+    function renderRecentTransactions(items) {
+      const tbody = document.getElementById('recentTransactionsTableBody');
+      if (!tbody) return;
+      if (!items || items.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-muted">ยังไม่มีรายการบันทึกในระบบ</td></tr>';
+        return;
+      }
+      let html = '';
+      items.forEach((item, index) => {
+        const isIncome = item.transaction_direction === 'INCOME';
+        const dirBadge = isIncome 
+          ? '<span class="badge badge-income"><i class="bi bi-arrow-down-left"></i> รายรับ</span>'
+          : '<span class="badge badge-expense"><i class="bi bi-arrow-up-right"></i> รายจ่าย</span>';
+        const amtClass = isIncome ? 'text-success fw-bold' : 'text-danger fw-semibold';
+        const detailText = item.detail ? `${item.detail}` : (item.note || '-');
+
+        html += `
+          <tr>
+            <td>${index + 1}</td>
+            <td>${formatToThaiBE(item.transaction_date)}</td>
+            <td><span class="badge ${isIncome ? 'badge-income' : 'badge-expense'}">${item.transaction_type}</span></td>
+            <td class="text-truncate" style="max-width: 200px;">${escapeHtml(detailText)}</td>
+            <td class="text-end">${item.egg_trays > 0 ? formatNumber(item.egg_trays) : '-'}</td>
+            <td class="text-end ${amtClass}">${formatCurrency(item.amount)}</td>
+            <td>${dirBadge}</td>
+          </tr>
+        `;
+      });
+      tbody.innerHTML = html;
+    }
+
+    function handleTransactionTypeChange() {
+      const type = document.getElementById('transType').value;
+      const grpEgg = document.getElementById('groupEggTrays');
+      const grpDetail = document.getElementById('groupDetail');
+      const inputEgg = document.getElementById('transEggTrays');
+      const inputDetail = document.getElementById('transDetail');
+      const colDate = document.getElementById('colTransDate');
+      const colType = document.getElementById('colTransType');
+      const colAmount = document.getElementById('colTransAmount');
+
+      if (type === 'รับค่าไข่ไก่') {
+        grpEgg.classList.remove('d-none');
+        inputEgg.setAttribute('required', 'required');
+        grpDetail.classList.add('d-none');
+        inputDetail.removeAttribute('required');
+        inputDetail.value = '';
+
+        if (colDate) colDate.className = 'col-12 col-sm-6 col-md-3';
+        if (colType) colType.className = 'col-12 col-sm-6 col-md-3';
+        if (grpEgg) grpEgg.className = 'col-12 col-sm-6 col-md-3';
+        if (colAmount) colAmount.className = 'col-12 col-sm-6 col-md-3';
+      } else if (type === 'ค่าอื่น ๆ') {
+        grpDetail.classList.remove('d-none');
+        inputDetail.setAttribute('required', 'required');
+        grpEgg.classList.add('d-none');
+        inputEgg.removeAttribute('required');
+        inputEgg.value = '';
+
+        if (colDate) colDate.className = 'col-12 col-md-4';
+        if (colType) colType.className = 'col-12 col-md-4';
+        if (colAmount) colAmount.className = 'col-12 col-md-4';
+      } else {
+        grpEgg.classList.add('d-none');
+        inputEgg.removeAttribute('required');
+        inputEgg.value = '';
+        grpDetail.classList.add('d-none');
+        inputDetail.removeAttribute('required');
+        inputDetail.value = '';
+
+        if (colDate) colDate.className = 'col-12 col-md-4';
+        if (colType) colType.className = 'col-12 col-md-4';
+        if (colAmount) colAmount.className = 'col-12 col-md-4';
+      }
+    }
+
+    function handleFileSelect(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      if (file.size > 5 * 1024 * 1024) {
+        showToast('ขนาดไฟล์เกินกำหนด (สูงสุดไม่เกิน 5 MB)', 'warning');
+        e.target.value = '';
+        return;
+      }
+      const allowed = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+      if (!allowed.includes(file.type.toLowerCase())) {
+        showToast('รองรับเฉพาะไฟล์รูปภาพ JPG, PNG และ WEBP เท่านั้น', 'warning');
+        e.target.value = '';
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = function (evt) {
+        state.selectedFile = { filename: file.name, mimeType: file.type, base64: evt.target.result };
+        document.getElementById('imagePreviewImg').src = evt.target.result;
+        document.getElementById('imageFileName').textContent = file.name;
+        document.getElementById('imagePreviewContainer').classList.remove('d-none');
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function clearSelectedFile() {
+      state.selectedFile = null;
+      document.getElementById('transFileInput').value = '';
+      document.getElementById('imagePreviewContainer').classList.add('d-none');
+      document.getElementById('imagePreviewImg').src = '';
+      document.getElementById('imageFileName').textContent = '';
+    }
+
+    function resetTransactionForm() {
+      document.getElementById('transactionForm').reset();
+      clearSelectedFile();
+      initDefaultDates();
+      handleTransactionTypeChange();
+    }
+
+    function handleFormSubmit(e) {
+      e.preventDefault();
+      if (state.isSubmitting) return;
+
+      const btn = document.getElementById('btnSubmitTransaction');
+      const dateVal = document.getElementById('transDate').value;
+      const typeVal = document.getElementById('transType').value;
+      const amountVal = parseFloat(document.getElementById('transAmount').value);
+      const eggTraysVal = document.getElementById('transEggTrays').value;
+      const detailVal = document.getElementById('transDetail').value;
+
+      if (!dateVal) { showToast('กรุณาระบุวันที่ทำรายการ', 'warning'); return; }
+      if (!typeVal) { showToast('กรุณาเลือกประเภทรายการ', 'warning'); return; }
+      if (isNaN(amountVal) || amountVal <= 0) { showToast('จำนวนเงินต้องเป็นตัวเลขที่มากกว่า 0 บาท', 'warning'); return; }
+      if (typeVal === 'รับค่าไข่ไก่' && (isNaN(parseInt(eggTraysVal, 10)) || parseInt(eggTraysVal, 10) < 1)) {
+        showToast('กรุณาระบุจำนวนแผงไข่อย่างน้อย 1 แผง', 'warning'); return;
+      }
+      if (typeVal === 'ค่าอื่น ๆ' && !detailVal.trim()) {
+        showToast('กรุณาระบุรายละเอียดเพิ่มเติมสำหรับค่าอื่น ๆ', 'warning'); return;
+      }
+
+      state.isSubmitting = true;
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> กำลังบันทึกข้อมูล...';
+      showLoading('กำลังประมวลผลและบันทึกข้อมูลลง Google Sheets...');
+
+      if (state.selectedFile) {
+        google.script.run
+          .withSuccessHandler(function (uploadRes) {
+            if (!uploadRes.success) {
+              hideLoading();
+              state.isSubmitting = false;
+              btn.disabled = false;
+              btn.innerHTML = '<i class="bi bi-save2-fill"></i> บันทึกข้อมูล';
+              showToast('อัปโหลดภาพแนบล้มเหลว: ' + uploadRes.message, 'danger');
+              return;
+            }
+            submitTransactionRecord(uploadRes.fileId);
+          })
+          .withFailureHandler(function (uploadErr) {
+            hideLoading();
+            state.isSubmitting = false;
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-save2-fill"></i> บันทึกข้อมูล';
+            showToast('เกิดข้อผิดพลาดในการส่งไฟล์: ' + uploadErr.message, 'danger');
+          })
+          .apiUploadAttachment(state.selectedFile);
+      } else {
+        submitTransactionRecord('');
+      }
+    }
+
+    function submitTransactionRecord(attachmentFileId) {
+      const btn = document.getElementById('btnSubmitTransaction');
+      const payload = {
+        transaction_date: document.getElementById('transDate').value,
+        transaction_type: document.getElementById('transType').value,
+        egg_trays: document.getElementById('transEggTrays').value || 0,
+        detail: document.getElementById('transDetail').value || '',
+        amount: document.getElementById('transAmount').value,
+        note: document.getElementById('transNote').value,
+        attachment_file_id: attachmentFileId
+      };
+
+      google.script.run
+        .withSuccessHandler(function (res) {
+          hideLoading();
+          state.isSubmitting = false;
+          btn.disabled = false;
+          btn.innerHTML = '<i class="bi bi-save2-fill"></i> บันทึกข้อมูล';
+          if (res && res.success) {
+            showToast(res.message || 'บันทึกรายการสำเร็จ', 'success');
+            resetTransactionForm();
+            loadTransactions(1);
+            loadDashboard();
+          } else {
+            showToast(res ? res.message : 'บันทึกล้มเหลว', 'danger');
+          }
+        })
+        .withFailureHandler(function (err) {
+          hideLoading();
+          state.isSubmitting = false;
+          btn.disabled = false;
+          btn.innerHTML = '<i class="bi bi-save2-fill"></i> บันทึกข้อมูล';
+          showToast('เกิดข้อผิดพลาดจากเซิร์ฟเวอร์: ' + err.message, 'danger');
+        })
+        .apiSaveTransaction(payload);
+    }
+
+    function debounceSearch() {
+      clearTimeout(state.searchDebounceTimer);
+      state.searchDebounceTimer = setTimeout(() => { loadTransactions(1); }, 400);
+    }
+
+    function loadTransactions(page = 1) {
+      state.transactionsPage = page;
+      state.transactionsFilters.search = document.getElementById('tableSearchInput').value.trim();
+      state.transactionsFilters.type = document.getElementById('tableFilterType').value;
+      state.transactionsFilters.monthYear = document.getElementById('tableFilterMonth').value;
+
+      const filters = {
+        search: state.transactionsFilters.search,
+        type: state.transactionsFilters.type,
+        monthYear: state.transactionsFilters.monthYear,
+        page: state.transactionsPage,
+        pageSize: state.transactionsPageSize
+      };
+
+      const tbody = document.getElementById('transactionsTableBody');
+      tbody.innerHTML = '<tr><td colspan="9" class="text-center py-4 text-muted"><div class="spinner-border spinner-border-sm text-success me-2"></div> กำลังดึงข้อมูล...</td></tr>';
+
+      google.script.run
+        .withSuccessHandler(function (res) {
+          if (!res || !res.success) {
+            tbody.innerHTML = `<tr><td colspan="9" class="text-center py-4 text-danger">${res ? res.message : 'โหลดข้อมูลไม่สำเร็จ'}</td></tr>`;
+            return;
+          }
+          renderTransactionsTable(res);
+        })
+        .withFailureHandler(function (err) {
+          tbody.innerHTML = `<tr><td colspan="9" class="text-center py-4 text-danger">เกิดข้อผิดพลาด: ${err.message}</td></tr>`;
+        })
+        .apiGetTransactions(filters);
+    }
+
+    function renderTransactionsTable(data) {
+      const tbody = document.getElementById('transactionsTableBody');
+      const items = data.items || [];
+
+      if (data.summary) {
+        document.getElementById('chipTotalCount').textContent = formatNumber(data.totalCount);
+        document.getElementById('chipTotalIncome').textContent = formatCurrency(data.summary.totalIncome);
+        document.getElementById('chipTotalExpense').textContent = formatCurrency(data.summary.totalExpense);
+        document.getElementById('chipNetBalance').textContent = formatCurrency(data.summary.netBalance);
+        document.getElementById('chipTotalTrays').textContent = formatNumber(data.summary.totalTrays);
+      }
+
+      if (items.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="9" class="text-center py-4 text-muted">ไม่พบข้อมูลที่ตรงกับเงื่อนไขการค้นหา</td></tr>';
+        renderPagination(0, 1, 1);
+        return;
+      }
+
+      let html = '';
+      const startNum = (data.page - 1) * data.pageSize;
+
+      items.forEach((item, idx) => {
+        const isIncome = item.transaction_direction === 'INCOME';
+        const typeBadge = `<span class="badge ${isIncome ? 'badge-income' : 'badge-expense'}">${item.transaction_type}</span>`;
+        const amtClass = isIncome ? 'text-success fw-bold' : 'text-danger fw-semibold';
+
+        let attachBtn = '<span class="text-muted small">-</span>';
+        if (item.attachment_file_id) {
+          attachBtn = `
+            <button class="btn btn-sm btn-outline-success py-0 px-2" onclick="viewAttachment('${item.attachment_file_id}', '${item.transaction_type}')" title="ดูภาพแนบ">
+              <i class="bi bi-image"></i>
+            </button>
+          `;
+        }
+
+        const recordJson = encodeURIComponent(JSON.stringify(item));
+        const actionBtns = `
+          <div class="d-flex justify-content-center gap-1">
+            <button class="btn-action-icon" onclick="openEditModal('${recordJson}')" title="แก้ไขรายการ">
+              <i class="bi bi-pencil-fill"></i>
+            </button>
+            <button class="btn-action-icon danger" onclick="confirmDeleteTransaction('${recordJson}')" title="ลบรายการ">
+              <i class="bi bi-trash-fill"></i>
+            </button>
+          </div>
+        `;
+
+        html += `
+          <tr>
+            <td class="text-muted">${startNum + idx + 1}</td>
+            <td><strong>${formatToThaiBE(item.transaction_date)}</strong></td>
+            <td>${typeBadge}</td>
+            <td>${escapeHtml(item.detail || '-')}</td>
+            <td class="text-end">${item.egg_trays > 0 ? formatNumber(item.egg_trays) : '-'}</td>
+            <td class="text-end ${amtClass}">${formatCurrency(item.amount)}</td>
+            <td class="text-truncate" style="max-width: 150px;">${escapeHtml(item.note || '-')}</td>
+            <td class="text-center">${attachBtn}</td>
+            <td class="text-center">${actionBtns}</td>
+          </tr>
+        `;
+      });
+
+      tbody.innerHTML = html;
+      renderPagination(data.totalCount, data.page, data.totalPages);
+    }
+
+    function renderPagination(totalCount, page, totalPages) {
+      const infoEl = document.getElementById('tablePaginationInfo');
+      const ctrlEl = document.getElementById('tablePaginationControls');
+      const start = totalCount === 0 ? 0 : (page - 1) * state.transactionsPageSize + 1;
+      const end = Math.min(page * state.transactionsPageSize, totalCount);
+      infoEl.textContent = `แสดง ${start} - ${end} จาก ${totalCount} รายการ`;
+
+      if (totalPages <= 1) { ctrlEl.innerHTML = ''; return; }
+
+      let html = `
+        <button class="btn btn-sm btn-outline-secondary" ${page === 1 ? 'disabled' : ''} onclick="loadTransactions(${page - 1})">
+          <i class="bi bi-chevron-left"></i>
+        </button>
+      `;
+
+      for (let i = 1; i <= totalPages; i++) {
+        if (i === 1 || i === totalPages || (i >= page - 1 && i <= page + 1)) {
+          html += `<button class="btn btn-sm ${i === page ? 'btn-farm-primary' : 'btn-outline-secondary'}" onclick="loadTransactions(${i})">${i}</button>`;
+        } else if (i === page - 2 || i === page + 2) {
+          html += '<span class="px-1 text-muted">...</span>';
+        }
+      }
+
+      html += `
+        <button class="btn btn-sm btn-outline-secondary" ${page === totalPages ? 'disabled' : ''} onclick="loadTransactions(${page + 1})">
+          <i class="bi bi-chevron-right"></i>
+        </button>
+      `;
+      ctrlEl.innerHTML = html;
+    }
+
+    function openEditModal(recordJson) {
+      const item = JSON.parse(decodeURIComponent(recordJson));
+      state.currentEditingRecord = item;
+      state.editSelectedFile = null;
+
+      document.getElementById('editRecordId').value = item.record_id;
+      document.getElementById('editTransDate').value = item.transaction_date;
+      document.getElementById('editTransType').value = item.transaction_type;
+      document.getElementById('editAmount').value = item.amount;
+      document.getElementById('editNote').value = item.note || '';
+      document.getElementById('editOriginalAttachmentId').value = item.attachment_file_id || '';
+      document.getElementById('editFileInput').value = '';
+
+      const attachText = document.getElementById('editCurrentAttachmentText');
+      if (item.attachment_file_id) {
+        attachText.innerHTML = `<span class="text-success"><i class="bi bi-check-circle-fill"></i> มีไฟล์แนบเดิมใน Google Drive</span>`;
+      } else {
+        attachText.textContent = 'ไม่มีไฟล์แนบเดิม';
+      }
+
+      handleEditTypeChange();
+      if (item.transaction_type === 'รับค่าไข่ไก่') document.getElementById('editEggTrays').value = item.egg_trays || 1;
+      if (item.transaction_type === 'ค่าอื่น ๆ') document.getElementById('editDetail').value = item.detail || '';
+
+      const modal = new bootstrap.Modal(document.getElementById('modalEditTransaction'));
+      modal.show();
+    }
+
+    function handleEditTypeChange() {
+      const type = document.getElementById('editTransType').value;
+      const grpEgg = document.getElementById('editGroupEggTrays');
+      const grpDetail = document.getElementById('editGroupDetail');
+      const colDate = document.getElementById('editColDate');
+      const colType = document.getElementById('editColType');
+      const colAmt = document.getElementById('editColAmount');
+
+      if (type === 'รับค่าไข่ไก่') {
+        grpEgg.classList.remove('d-none');
+        grpDetail.classList.add('d-none');
+        if (colDate) colDate.className = 'col-12 col-sm-6 col-md-3';
+        if (colType) colType.className = 'col-12 col-sm-6 col-md-3';
+        if (grpEgg) grpEgg.className = 'col-12 col-sm-6 col-md-3';
+        if (colAmt) colAmt.className = 'col-12 col-sm-6 col-md-3';
+      } else if (type === 'ค่าอื่น ๆ') {
+        grpDetail.classList.remove('d-none');
+        grpEgg.classList.add('d-none');
+        if (colDate) colDate.className = 'col-12 col-md-4';
+        if (colType) colType.className = 'col-12 col-md-4';
+        if (colAmt) colAmt.className = 'col-12 col-md-4';
+      } else {
+        grpEgg.classList.add('d-none');
+        grpDetail.classList.add('d-none');
+        if (colDate) colDate.className = 'col-12 col-md-4';
+        if (colType) colType.className = 'col-12 col-md-4';
+        if (colAmt) colAmt.className = 'col-12 col-md-4';
+      }
+    }
+
+    function handleEditFormSubmit(e) {
+      e.preventDefault();
+      const btn = document.getElementById('btnSubmitEdit');
+      const recordId = document.getElementById('editRecordId').value;
+      const fileInput = document.getElementById('editFileInput');
+
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> กำลังบันทึก...';
+
+      if (fileInput.files && fileInput.files[0]) {
+        const file = fileInput.files[0];
+        const reader = new FileReader();
+        reader.onload = function (evt) {
+          const fileData = { filename: file.name, mimeType: file.type, base64: evt.target.result };
+          google.script.run
+            .withSuccessHandler(function (uploadRes) {
+              if (!uploadRes.success) {
+                btn.disabled = false;
+                btn.innerHTML = 'บันทึกการแก้ไข';
+                showToast('อัปโหลดไฟล์ใหม่ไม่สำเร็จ: ' + uploadRes.message, 'danger');
+                return;
+              }
+              executeEditSubmission(recordId, uploadRes.fileId);
+            })
+            .withFailureHandler(function (err) {
+              btn.disabled = false;
+              btn.innerHTML = 'บันทึกการแก้ไข';
+              showToast('อัปโหลดไฟล์ล้มเหลว: ' + err.message, 'danger');
+            })
+            .apiUploadAttachment(fileData);
+        };
+        reader.readAsDataURL(file);
+      } else {
+        executeEditSubmission(recordId, document.getElementById('editOriginalAttachmentId').value);
+      }
+    }
+
+    function executeEditSubmission(recordId, attachmentFileId) {
+      const btn = document.getElementById('btnSubmitEdit');
+      const payload = {
+        transaction_date: document.getElementById('editTransDate').value,
+        transaction_type: document.getElementById('editTransType').value,
+        egg_trays: document.getElementById('editEggTrays').value || 0,
+        detail: document.getElementById('editDetail').value || '',
+        amount: document.getElementById('editAmount').value,
+        note: document.getElementById('editNote').value,
+        attachment_file_id: attachmentFileId
+      };
+
+      google.script.run
+        .withSuccessHandler(function (res) {
+          btn.disabled = false;
+          btn.innerHTML = 'บันทึกการแก้ไข';
+          if (res && res.success) {
+            bootstrap.Modal.getInstance(document.getElementById('modalEditTransaction')).hide();
+            showToast('แก้ไขข้อมูลเรียบร้อย', 'success');
+            loadTransactions(state.transactionsPage);
+            loadDashboard();
+          } else {
+            showToast(res ? res.message : 'แก้ไขรายการไม่สำเร็จ', 'danger');
+          }
+        })
+        .withFailureHandler(function (err) {
+          btn.disabled = false;
+          btn.innerHTML = 'บันทึกการแก้ไข';
+          showToast('เกิดข้อผิดพลาดในการอัปเดต: ' + err.message, 'danger');
+        })
+        .apiUpdateTransaction(recordId, payload);
+    }
+
+    function confirmDeleteTransaction(recordJson) {
+      const item = JSON.parse(decodeURIComponent(recordJson));
+      state.deletingRecordId = item.record_id;
+      document.getElementById('delConfirmDate').textContent = formatToThaiBE(item.transaction_date);
+      document.getElementById('delConfirmType').textContent = item.transaction_type;
+      document.getElementById('delConfirmAmount').textContent = formatCurrency(item.amount);
+      document.getElementById('delConfirmDetail').textContent = item.detail || item.note || '-';
+      const modal = new bootstrap.Modal(document.getElementById('modalDeleteConfirm'));
+      modal.show();
+    }
+
+    function executeDeleteTransaction() {
+      if (!state.deletingRecordId) return;
+      const btn = document.getElementById('btnConfirmDelete');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> กำลังลบ...';
+
+      google.script.run
+        .withSuccessHandler(function (res) {
+          btn.disabled = false;
+          btn.innerHTML = '<i class="bi bi-trash-fill me-1"></i> ยืนยันการลบ';
+          bootstrap.Modal.getInstance(document.getElementById('modalDeleteConfirm')).hide();
+          if (res && res.success) {
+            showToast(res.message || 'ลบรายการเรียบร้อย', 'success');
+            loadTransactions(state.transactionsPage);
+            loadDashboard();
+          } else {
+            showToast(res ? res.message : 'ลบรายการไม่สำเร็จ', 'danger');
+          }
+        })
+        .withFailureHandler(function (err) {
+          btn.disabled = false;
+          btn.innerHTML = '<i class="bi bi-trash-fill me-1"></i> ยืนยันการลบ';
+          showToast('เกิดข้อผิดพลาดในการลบ: ' + err.message, 'danger');
+        })
+        .apiDeleteTransaction(state.deletingRecordId);
+    }
+
+    function viewAttachment(fileId, title) {
+      const modal = new bootstrap.Modal(document.getElementById('modalImagePreview'));
+      document.getElementById('imagePreviewTitle').textContent = `หลักฐาน: ${title}`;
+      document.getElementById('imagePreviewLoading').classList.remove('d-none');
+      document.getElementById('imagePreviewFull').classList.add('d-none');
+      document.getElementById('imagePreviewFull').src = '';
+      modal.show();
+
+      google.script.run
+        .withSuccessHandler(function (res) {
+          document.getElementById('imagePreviewLoading').classList.add('d-none');
+          if (res && res.success && res.dataUrl) {
+            const img = document.getElementById('imagePreviewFull');
+            img.src = res.dataUrl;
+            img.classList.remove('d-none');
+          } else {
+            showToast(res ? res.message : 'ไม่สามารถแสดงรูปภาพได้', 'danger');
+          }
+        })
+        .withFailureHandler(function (err) {
+          document.getElementById('imagePreviewLoading').classList.add('d-none');
+          showToast('เกิดข้อผิดพลาดในการดึงไฟล์แนบ: ' + err.message, 'danger');
+        })
+        .apiGetAttachment(fileId);
+    }
+
+    function openReportModal() {
+      const modal = new bootstrap.Modal(document.getElementById('modalReportOptions'));
+      modal.show();
+    }
+
+    function generateAndPrintReport() {
+      const startDate = document.getElementById('reportStartDate').value;
+      const endDate = document.getElementById('reportEndDate').value;
+      const transType = document.getElementById('reportTransactionType').value;
+
+      if (startDate && endDate && startDate > endDate) {
+        showToast('วันเริ่มต้นต้องไม่มากกว่าวันสิ้นสุด', 'warning');
+        return;
+      }
+
+      showLoading('กำลังจัดเตรียมข้อมูลรายงาน...');
+      google.script.run
+        .withSuccessHandler(function (res) {
+          hideLoading();
+          if (!res || !res.success) {
+            showToast(res ? res.message : 'สร้างรายงานไม่สำเร็จ', 'danger');
+            return;
+          }
+          populatePrintSheet(res);
+          bootstrap.Modal.getInstance(document.getElementById('modalReportOptions')).hide();
+          setTimeout(() => { window.print(); }, 300);
+        })
+        .withFailureHandler(function (err) {
+          hideLoading();
+          showToast('เกิดข้อผิดพลาดในการดึงข้อมูลรายงาน: ' + err.message, 'danger');
+        })
+        .apiGetReportData({ startDate: startDate, endDate: endDate, transactionType: transType });
+    }
+
+    function populatePrintSheet(data) {
+      document.getElementById('printReportFarmName').textContent = data.farmName || 'ฟาร์มไก่ไข่';
+      document.getElementById('printReportDateRange').textContent = `${data.filterConditions.startDateThai} ถึง ${data.filterConditions.endDateThai}`;
+      document.getElementById('printReportType').textContent = data.filterConditions.transactionType;
+      document.getElementById('printSumIncome').textContent = `${formatCurrency(data.summary.totalIncome)} บาท`;
+      document.getElementById('printSumExpense').textContent = `${formatCurrency(data.summary.totalExpense)} บาท`;
+      document.getElementById('printSumNet').textContent = `${formatCurrency(data.summary.netBalance)} บาท`;
+      document.getElementById('printSumTrays').textContent = `${formatNumber(data.summary.totalEggTrays)} แผง`;
+      document.getElementById('printReportGeneratedDate').textContent = data.generatedDateThai;
+
+      const tbody = document.getElementById('printReportTableBody');
+      const items = data.items || [];
+      if (items.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center py-3">ไม่พบรายการข้อมูลตามเงื่อนไขที่กำหนด</td></tr>';
+        return;
+      }
+      let html = '';
+      items.forEach((item, idx) => {
+        html += `
+          <tr>
+            <td class="text-center">${idx + 1}</td>
+            <td>${formatToThaiBE(item.transaction_date)}</td>
+            <td>${item.transaction_type}</td>
+            <td>${escapeHtml(item.detail || '-')}</td>
+            <td class="text-end">${item.egg_trays > 0 ? formatNumber(item.egg_trays) : '-'}</td>
+            <td class="text-end fw-semibold">${formatCurrency(item.amount)}</td>
+            <td>${escapeHtml(item.note || '-')}</td>
+          </tr>
+        `;
+      });
+      tbody.innerHTML = html;
+    }
+
+    function loadCctv() { refreshCctvStatus(); }
+
+    function refreshCctvStatus() {
+      const dot = document.getElementById('cctvStatusDot');
+      const badge = document.getElementById('cctvStatusBadge');
+      const videoDot = document.getElementById('cctvVideoDot');
+      const videoText = document.getElementById('cctvVideoStatusText');
+      const videoEl = document.getElementById('cctvVideoPlayer');
+      const placeholder = document.getElementById('cctvPlaceholder');
+
+      badge.textContent = 'กำลังตรวจสอบ...';
+      google.script.run
+        .withSuccessHandler(function (res) {
+          if (!res || !res.success) {
+            dot.className = 'status-pulse offline';
+            badge.textContent = 'ไม่สามารถตรวจสอบได้';
+            return;
+          }
+          const cam = res.camera;
+          const gatewayInput = document.getElementById('cameraGatewayInput');
+          if (gatewayInput && cam.gatewayUrl) gatewayInput.value = cam.gatewayUrl;
+
+          if (cam.connectionMode === 'GATEWAY' && cam.gatewayUrl) {
+            dot.className = 'status-pulse warning';
+            badge.textContent = 'โหมด Video Gateway';
+            videoDot.className = 'status-pulse warning';
+            videoText.textContent = 'Xiaomi C300 - โหมด Video Gateway';
+            initHlsStream(cam.gatewayUrl);
+          } else {
+            dot.className = 'status-pulse';
+            badge.textContent = 'โหมด Xiaomi Home (พร้อมใช้งาน)';
+            videoDot.className = 'status-pulse';
+            videoText.textContent = 'Xiaomi C300 - เชื่อมต่อผ่าน Mi Cloud';
+            videoEl.classList.add('d-none');
+            placeholder.classList.remove('d-none');
+          }
+        })
+        .withFailureHandler(function (err) {
+          dot.className = 'status-pulse offline';
+          badge.textContent = 'ข้อผิดพลาดระบบ';
+          showToast('ไม่สามารถตรวจสอบสถานะกล้องได้: ' + err.message, 'danger');
+        })
+        .apiGetCameraConfig();
+    }
+
+    function initHlsStream(streamUrl) {
+      const video = document.getElementById('cctvVideoPlayer');
+      const placeholder = document.getElementById('cctvPlaceholder');
+      const videoText = document.getElementById('cctvVideoStatusText');
+      const videoDot = document.getElementById('cctvVideoDot');
+
+      if (Hls.isSupported()) {
+        if (state.hlsPlayer) state.hlsPlayer.destroy();
+        const hls = new Hls({ enableWorker: true, lowLatencyMode: true });
+        state.hlsPlayer = hls;
+        hls.loadSource(streamUrl);
+        hls.attachMedia(video);
+        hls.on(Hls.Events.MANIFEST_PARSED, function () {
+          video.classList.remove('d-none');
+          placeholder.classList.add('d-none');
+          video.play().catch(() => {});
+          videoDot.className = 'status-pulse';
+          videoText.textContent = 'Xiaomi C300 - กำลังถ่ายทอดสด (HLS)';
+        });
+        hls.on(Hls.Events.ERROR, function (e, d) {
+          if (d.fatal) {
+            video.classList.add('d-none');
+            placeholder.classList.remove('d-none');
+            videoDot.className = 'status-pulse offline';
+            videoText.textContent = 'ไม่สามารถดึงสตรีมจาก Video Gateway ได้';
+          }
+        });
+      } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+        video.src = streamUrl;
+        video.classList.remove('d-none');
+        placeholder.classList.add('d-none');
+        video.play().catch(() => {});
+      } else {
+        showToast('เบราว์เซอร์ไม่รองรับการเล่นสตรีม HLS', 'warning');
+      }
+    }
+
+    function openXiaomiHomeApp() {
+      const deepLink = 'mihome://';
+      const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+      if (isMobile) {
+        window.location.href = deepLink;
+        setTimeout(() => {
+          showToast('กรุณาเปิดแอป Xiaomi Home เพื่อดูกล้อง Xiaomi Smart Camera C300', 'info');
+        }, 1500);
+      } else {
+        showToast('กรุณาเปิดแอป Xiaomi Home บนสมาร์ตโฟน เพื่อรับชมภาพสด', 'info');
+      }
+    }
+
+    function scrollToGatewaySettings() {
+      const sec = document.getElementById('gatewaySettingsSection');
+      if (sec) sec.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function saveGatewaySetting() {
+      const url = document.getElementById('cameraGatewayInput').value.trim();
+      if (url && !url.startsWith('https://')) {
+        showToast('Video Gateway URL ต้องขึ้นต้นด้วย https:// เท่านั้น', 'warning');
+        return;
+      }
+      showLoading('กำลังบันทึกการตั้งค่า Video Gateway...');
+      const payload = { connectionMode: url ? 'GATEWAY' : 'APP', gatewayUrl: url };
+      google.script.run
+        .withSuccessHandler(function (res) {
+          hideLoading();
+          if (res && res.success) {
+            showToast('บันทึกการตั้งค่าสำเร็จ', 'success');
+            refreshCctvStatus();
+          } else {
+            showToast(res ? res.message : 'บันทึกล้มเหลว', 'danger');
+          }
+        })
+        .withFailureHandler(function (err) {
+          hideLoading();
+          showToast('เกิดข้อผิดพลาด: ' + err.message, 'danger');
+        })
+        .apiSaveCameraConfig(payload);
+    }
+
+    function formatCurrency(num) {
+      const val = parseFloat(num) || 0;
+      return val.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function formatNumber(num) {
+      const val = parseInt(num, 10) || 0;
+      return val.toLocaleString('th-TH');
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function showLoading(msg = 'กำลังประมวลผล...') {
+      const overlay = document.getElementById('loadingOverlay');
+      const text = document.getElementById('loadingText');
+      if (text) text.textContent = msg;
+      if (overlay) overlay.classList.add('show');
+    }
+
+    function hideLoading() {
+      const overlay = document.getElementById('loadingOverlay');
+      if (overlay) overlay.classList.remove('show');
+    }
+
+    function showToast(message, type = 'info') {
+      const toastEl = document.getElementById('appToast');
+      const toastText = document.getElementById('toastText');
+      const toastIcon = document.getElementById('toastIcon');
+      if (!toastEl) return;
+
+      toastEl.className = 'toast align-items-center border-0 text-white';
+      if (type === 'success') {
+        toastEl.classList.add('bg-success');
+        toastIcon.className = 'bi bi-check-circle-fill';
+      } else if (type === 'danger') {
+        toastEl.classList.add('bg-danger');
+        toastIcon.className = 'bi bi-x-circle-fill';
+      } else if (type === 'warning') {
+        toastEl.classList.add('bg-warning', 'text-dark');
+        toastIcon.className = 'bi bi-exclamation-triangle-fill';
+      } else {
+        toastEl.classList.add('bg-primary');
+        toastIcon.className = 'bi bi-info-circle-fill';
+      }
+
+      toastText.textContent = message;
+      const bsToast = new bootstrap.Toast(toastEl, { delay: 4000 });
+      bsToast.show();
+    }
+  </script>
+
+</body>
+</html>
