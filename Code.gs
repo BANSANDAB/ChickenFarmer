@@ -1105,6 +1105,12 @@ function formatFullDateTimeThai(date) {
 
 function doGet(e) {
   try {
+    // 1. ตรวจสอบว่าเป็นการเรียก API จากภายนอก (เช่น GitHub Pages) หรือไม่
+    if (e && e.parameter && e.parameter.action) {
+      return handleApiRequest(e);
+    }
+
+    // 2. แสดงหน้า Web App สำหรับ Google Apps Script ปกติ
     const template = HtmlService.createTemplateFromFile('Index');
     template.appTitle = 'ระบบบริหารจัดการฟาร์มไก่ไข่';
     template.spreadsheetId = CONFIG.SPREADSHEET_ID;
@@ -1117,6 +1123,9 @@ function doGet(e) {
 
     return htmlOutput;
   } catch (error) {
+    if (e && e.parameter && e.parameter.action) {
+      return createJsonResponse({ success: false, message: error.message }, e.parameter.callback);
+    }
     return HtmlService.createHtmlOutput(
       '<div style="font-family: sans-serif; padding: 20px; color: #721c24; background: #f8d7da; border-radius: 8px;">' +
       '<h3>เกิดข้อผิดพลาดในการโหลดระบบ</h3>' +
@@ -1124,6 +1133,98 @@ function doGet(e) {
       '</div>'
     );
   }
+}
+
+function doPost(e) {
+  try {
+    return handleApiRequest(e);
+  } catch (error) {
+    return createJsonResponse({ success: false, message: error.message });
+  }
+}
+
+function handleApiRequest(e) {
+  let action = '';
+  let data = {};
+  const callback = (e && e.parameter && e.parameter.callback) ? e.parameter.callback : null;
+
+  if (e && e.parameter) {
+    if (e.parameter.action) action = e.parameter.action;
+    Object.assign(data, e.parameter);
+  }
+
+  if (e && e.postData && e.postData.contents) {
+    try {
+      const parsed = JSON.parse(e.postData.contents);
+      if (parsed.action) action = parsed.action;
+      if (parsed.data) data = Object.assign({}, data, parsed.data);
+      else if (parsed.payload) data = Object.assign({}, data, parsed.payload);
+      else Object.assign(data, parsed);
+    } catch (err) {}
+  }
+
+  // แปลง payload หรือ filters หากส่งมาในรูปแบบ JSON string
+  if (data.payload && typeof data.payload === 'string') {
+    try { data = Object.assign({}, data, JSON.parse(data.payload)); } catch (_) {}
+  }
+  if (data.filters && typeof data.filters === 'string') {
+    try { data.filters = JSON.parse(data.filters); } catch (_) {}
+  }
+  if (data.fileData && typeof data.fileData === 'string') {
+    try { data.fileData = JSON.parse(data.fileData); } catch (_) {}
+  }
+
+  let result = { success: false, message: 'Invalid action: ' + action };
+
+  switch (action) {
+    case 'setupDatabase':
+      result = setupDatabase();
+      break;
+    case 'getDashboardData':
+      result = getDashboardData(data.filters || data);
+      break;
+    case 'getTransactions':
+      result = getTransactions(data.filters || data);
+      break;
+    case 'saveTransaction':
+      result = saveTransaction(data.payload || data);
+      break;
+    case 'updateTransaction':
+      result = updateTransaction(data.recordId || data.record_id, data.payload || data);
+      break;
+    case 'deleteTransaction':
+      result = deleteTransaction(data.recordId || data.record_id);
+      break;
+    case 'uploadAttachment':
+      result = uploadAttachment(data.fileData || data);
+      break;
+    case 'getAttachment':
+      result = getAttachment(data.fileId || data.file_id);
+      break;
+    case 'getReportData':
+      result = getReportData(data.filters || data);
+      break;
+    case 'getSettings':
+      result = getSettings();
+      break;
+    case 'saveSettings':
+      result = saveSettings(data.payload || data);
+      break;
+    default:
+      result = { success: false, message: 'Unknown action: ' + action };
+  }
+
+  return createJsonResponse(result, callback);
+}
+
+function createJsonResponse(data, callback) {
+  const jsonStr = JSON.stringify(data);
+  if (callback) {
+    return ContentService.createTextOutput(callback + '(' + jsonStr + ')')
+      .setMimeType(ContentService.MimeType.JAVASCRIPT);
+  }
+  return ContentService.createTextOutput(jsonStr)
+    .setMimeType(ContentService.MimeType.JSON);
 }
 
 // API Endpoints ที่เรียกจาก google.script.run
