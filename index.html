@@ -1074,47 +1074,9 @@
                3. ตารางรายการที่บันทึก (แสดงต่อกันเรื่อยๆ ค้นหาตามประเภท เรียงตามวัน/เดือน/ปี)
                ======================================================== -->
           <div class="farm-card" id="sectionTable">
-            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
-              <h5 class="fw-bold mb-0">
-                <i class="bi bi-table text-success me-2"></i>ตารางรายการที่บันทึก
-              </h5>
-              <div class="d-flex align-items-center gap-2">
-                <button class="btn btn-sm btn-farm-outline" onclick="openReportModal()">
-                  <i class="bi bi-printer-fill"></i> พิมพ์รายงาน
-                </button>
-                <button class="btn btn-sm btn-farm-secondary" onclick="loadTransactions(1)" title="รีเฟรชข้อมูลล่าสุด">
-                  <i class="bi bi-arrow-clockwise"></i> รีเฟรชตาราง
-                </button>
-              </div>
-            </div>
-
-            <!-- หมวดหมู่ด่วน (Category Filter Pills) -->
-            <div class="category-pills-container mb-3" id="categoryPillsList">
-              <span class="btn-cat-pill active" data-category="" onclick="setCategoryFilter('')">
-                <i class="bi bi-grid-fill"></i> ทั้งหมด
-              </span>
-              <span class="btn-cat-pill income-pill" data-category="รับค่าไข่ไก่" onclick="setCategoryFilter('รับค่าไข่ไก่')">
-                <i class="bi bi-egg-fried"></i> รับค่าไข่ไก่
-              </span>
-              <span class="btn-cat-pill income-pill" data-category="รายรับเงินอื่น" onclick="setCategoryFilter('รายรับเงินอื่น')">
-                <i class="bi bi-cash-coin"></i> รายรับเงินอื่น
-              </span>
-              <span class="btn-cat-pill expense-pill" data-category="ค่าหัวอาหารไก่" onclick="setCategoryFilter('ค่าหัวอาหารไก่')">
-                <i class="bi bi-bag-fill"></i> ค่าหัวอาหารไก่
-              </span>
-              <span class="btn-cat-pill expense-pill" data-category="ค่าฟางก้อน" onclick="setCategoryFilter('ค่าฟางก้อน')">
-                <i class="bi bi-stack"></i> ค่าฟางก้อน
-              </span>
-              <span class="btn-cat-pill expense-pill" data-category="ค่าอาหารเสริม" onclick="setCategoryFilter('ค่าอาหารเสริม')">
-                <i class="bi bi-capsule"></i> ค่าอาหารเสริม
-              </span>
-              <span class="btn-cat-pill expense-pill" data-category="ค่าวัสดุ-อุปกรณ์ปรับปรุงเล้า" onclick="setCategoryFilter('ค่าวัสดุ-อุปกรณ์ปรับปรุงเล้า')">
-                <i class="bi bi-tools"></i> ค่าวัสดุ-อุปกรณ์ฯ
-              </span>
-              <span class="btn-cat-pill expense-pill" data-category="ค่าอื่นๆ" onclick="setCategoryFilter('ค่าอื่นๆ')">
-                <i class="bi bi-three-dots"></i> ค่าอื่นๆ
-              </span>
-            </div>
+            <h5 class="fw-bold mb-3">
+              <i class="bi bi-table text-success me-2"></i>ตารางรายการที่บันทึก
+            </h5>
 
             <!-- แถบเครื่องมือค้นหาและกรองข้อมูล (Filter Toolbar) -->
             <div class="row g-2 align-items-center mb-3">
@@ -1178,25 +1140,24 @@
               <div class="small" style="color: #B37D19;"><strong>แผงไข่รวม:</strong> <span id="chipTotalTrays">0</span> แผง</div>
             </div>
 
-            <!-- Data Table -->
+            <!-- Data Table (ลำดับ วันที่บันทึก รายการ รายละเอียด จำนวนเงิน จำนวนแผง ไฟล์แนบ จัดการ) -->
             <div class="farm-table-container">
               <table class="table table-farm">
                 <thead>
                   <tr>
-                    <th style="width: 50px;">ลำดับ</th>
-                    <th style="width: 130px;">วันที่บันทึก (พ.ศ.)</th>
-                    <th style="width: 140px;">ประเภทรายการ</th>
+                    <th style="width: 55px;" class="text-center">ลำดับ</th>
+                    <th style="width: 130px;">วันที่บันทึก</th>
+                    <th style="width: 140px;">รายการ</th>
                     <th>รายละเอียด</th>
+                    <th class="text-end" style="width: 130px;">จำนวนเงิน</th>
                     <th class="text-end" style="width: 100px;">จำนวนแผง</th>
-                    <th class="text-end" style="width: 125px;">จำนวนเงิน (บาท)</th>
-                    <th>หมายเหตุ</th>
                     <th class="text-center" style="width: 80px;">ไฟล์แนบ</th>
                     <th class="text-center" style="width: 95px;">จัดการ</th>
                   </tr>
                 </thead>
                 <tbody id="transactionsTableBody">
                   <tr>
-                    <td colspan="9" class="text-center py-4 text-muted">กำลังโหลดข้อมูลรายการ...</td>
+                    <td colspan="8" class="text-center py-4 text-muted">กำลังโหลดข้อมูลรายการ...</td>
                   </tr>
                 </tbody>
               </table>
@@ -2375,18 +2336,18 @@
       };
 
       const tbody = document.getElementById('transactionsTableBody');
-      tbody.innerHTML = '<tr><td colspan="9" class="text-center py-4 text-muted"><div class="spinner-border spinner-border-sm text-success me-2"></div> กำลังดึงข้อมูล...</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="8" class="text-center py-4 text-muted"><div class="spinner-border spinner-border-sm text-success me-2"></div> กำลังดึงข้อมูล...</td></tr>';
 
       google.script.run
         .withSuccessHandler(function (res) {
           if (!res || !res.success) {
-            tbody.innerHTML = `<tr><td colspan="9" class="text-center py-4 text-danger">${res ? res.message : 'โหลดข้อมูลไม่สำเร็จ'}</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="8" class="text-center py-4 text-danger">${res ? res.message : 'โหลดข้อมูลไม่สำเร็จ'}</td></tr>`;
             return;
           }
           renderTransactionsTable(res);
         })
         .withFailureHandler(function (err) {
-          tbody.innerHTML = `<tr><td colspan="9" class="text-center py-4 text-danger">เกิดข้อผิดพลาด: ${err.message}</td></tr>`;
+          tbody.innerHTML = `<tr><td colspan="8" class="text-center py-4 text-danger">เกิดข้อผิดพลาด: ${err.message}</td></tr>`;
         })
         .apiGetTransactions(filters);
     }
@@ -2404,7 +2365,7 @@
       }
 
       if (items.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="9" class="text-center py-4 text-muted">ไม่พบข้อมูลที่ตรงกับเงื่อนไขการค้นหา</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="8" class="text-center py-4 text-muted">ไม่พบข้อมูลที่ตรงกับเงื่อนไขการค้นหา</td></tr>';
         renderPagination(0, 1, 1);
         return;
       }
@@ -2438,15 +2399,25 @@
           </div>
         `;
 
+        let detailText = item.detail ? escapeHtml(item.detail) : '';
+        let noteText = item.note ? escapeHtml(item.note) : '';
+        let fullDetail = '-';
+        if (detailText && noteText && detailText !== noteText) {
+          fullDetail = `<div>${detailText}</div><small class="text-muted">${noteText}</small>`;
+        } else if (detailText) {
+          fullDetail = detailText;
+        } else if (noteText) {
+          fullDetail = noteText;
+        }
+
         html += `
           <tr>
-            <td class="text-muted">${startNum + idx + 1}</td>
+            <td class="text-muted text-center">${startNum + idx + 1}</td>
             <td><strong>${formatToThaiBE(item.transaction_date)}</strong></td>
             <td>${typeBadge}</td>
-            <td>${escapeHtml(item.detail || '-')}</td>
-            <td class="text-end">${item.egg_trays > 0 ? formatNumber(item.egg_trays) : '-'}</td>
+            <td>${fullDetail}</td>
             <td class="text-end ${amtClass}">${formatCurrency(item.amount)}</td>
-            <td class="text-truncate" style="max-width: 150px;">${escapeHtml(item.note || '-')}</td>
+            <td class="text-end">${item.egg_trays > 0 ? formatNumber(item.egg_trays) : '-'}</td>
             <td class="text-center">${attachBtn}</td>
             <td class="text-center">${actionBtns}</td>
           </tr>
