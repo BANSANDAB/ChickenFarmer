@@ -47,9 +47,14 @@ const CONFIG = {
   // ประเภทรายการและทิศทางการเงิน
   TRANSACTION_TYPES: {
     EGG_INCOME: 'รับค่าไข่ไก่',
-    FEED_EXPENSE: 'ค่าอาหารไก่ไข่',
+    OTHER_INCOME: 'รายรับเงินอื่น',
+    FEED_EXPENSE: 'ค่าหัวอาหารไก่',
+    FEED_EXPENSE_OLD: 'ค่าอาหารไก่ไข่',
     STRAW_EXPENSE: 'ค่าฟางก้อน',
-    OTHER_EXPENSE: 'ค่าอื่น ๆ'
+    SUPPLEMENT_EXPENSE: 'ค่าอาหารเสริม',
+    FACILITY_EXPENSE: 'ค่าวัสดุ-อุปกรณ์ปรับปรุงเล้า',
+    OTHER_EXPENSE: 'ค่าอื่นๆ',
+    OTHER_EXPENSE_OLD: 'ค่าอื่น ๆ'
   },
 
   DIRECTIONS: {
@@ -78,12 +83,17 @@ const CONFIG = {
   SYSTEM: {
     TIMEZONE: 'Asia/Bangkok',
     LOCK_TIMEOUT_MS: 10000,
-    DEFAULT_PAGE_SIZE: 10
+    DEFAULT_PAGE_SIZE: 50
   }
 };
 
 function getTransactionDirection(typeName) {
-  if (typeName === CONFIG.TRANSACTION_TYPES.EGG_INCOME) {
+  if (
+    typeName === CONFIG.TRANSACTION_TYPES.EGG_INCOME ||
+    typeName === CONFIG.TRANSACTION_TYPES.OTHER_INCOME ||
+    typeName === 'รับค่าไข่ไก่' ||
+    typeName === 'รายรับเงินอื่น'
+  ) {
     return CONFIG.DIRECTIONS.INCOME;
   }
   return CONFIG.DIRECTIONS.EXPENSE;
@@ -91,10 +101,15 @@ function getTransactionDirection(typeName) {
 
 function isValidTransactionType(typeName) {
   const allowed = [
-    CONFIG.TRANSACTION_TYPES.EGG_INCOME,
-    CONFIG.TRANSACTION_TYPES.FEED_EXPENSE,
-    CONFIG.TRANSACTION_TYPES.STRAW_EXPENSE,
-    CONFIG.TRANSACTION_TYPES.OTHER_EXPENSE
+    'รับค่าไข่ไก่',
+    'รายรับเงินอื่น',
+    'ค่าหัวอาหารไก่',
+    'ค่าอาหารไก่ไข่',
+    'ค่าฟางก้อน',
+    'ค่าอาหารเสริม',
+    'ค่าวัสดุ-อุปกรณ์ปรับปรุงเล้า',
+    'ค่าอื่นๆ',
+    'ค่าอื่น ๆ'
   ];
   return allowed.includes(typeName);
 }
@@ -198,9 +213,6 @@ function setupDatabase() {
       const now = new Date().toISOString();
       const defaultSettings = [
         ['farm_name', 'ฟาร์มไก่ไข่สุขใจ', 'ชื่อฟาร์มไก่ไข่', now],
-        ['camera_name', 'Xiaomi Smart Camera C300', 'ชื่อรุ่นกล้องวงจรปิด', now],
-        ['camera_connection_mode', 'APP', 'โหมดการเชื่อมต่อกล้อง (APP หรือ GATEWAY)', now],
-        ['camera_gateway_url', '', 'HTTPS HLS Stream URL จาก Video Gateway (ถ้ามี)', now],
         ['currency', 'THB', 'สกุลเงินหลัก', now]
       ];
       defaultSettings.forEach(row => settingsSheet.appendRow(row));
@@ -406,7 +418,7 @@ function saveTransaction(payload) {
     const direction = getTransactionDirection(type);
 
     let eggTrays = 0;
-    if (type === CONFIG.TRANSACTION_TYPES.EGG_INCOME) {
+    if (type === 'รับค่าไข่ไก่' || type === CONFIG.TRANSACTION_TYPES.EGG_INCOME) {
       eggTrays = parseInt(payload.egg_trays, 10);
       if (isNaN(eggTrays) || eggTrays < 1) {
         return { success: false, message: 'จำนวนแผงไข่ต้องเป็นตัวเลขจำนวนเต็มตั้งแต่ 1 แผงขึ้นไป' };
@@ -414,10 +426,20 @@ function saveTransaction(payload) {
     }
 
     let detail = '';
-    if (type === CONFIG.TRANSACTION_TYPES.OTHER_EXPENSE) {
+    if (type === 'รายรับเงินอื่น' || type === CONFIG.TRANSACTION_TYPES.OTHER_INCOME) {
       detail = sanitizeString(payload.detail);
       if (!detail) {
-        return { success: false, message: 'กรุณากรอกรายละเอียดเพิ่มเติมสำหรับรายการค่าอื่น ๆ' };
+        return { success: false, message: 'กรุณากรอกรายละเอียดเพิ่มเติมสำหรับรายการรายรับเงินอื่น' };
+      }
+    } else if (
+      type === 'ค่าอื่นๆ' ||
+      type === 'ค่าอื่น ๆ' ||
+      type === CONFIG.TRANSACTION_TYPES.OTHER_EXPENSE ||
+      type === CONFIG.TRANSACTION_TYPES.OTHER_EXPENSE_OLD
+    ) {
+      detail = sanitizeString(payload.detail);
+      if (!detail) {
+        return { success: false, message: 'กรุณากรอกรายละเอียดเพิ่มเติมสำหรับรายการค่าอื่นๆ' };
       }
     } else {
       detail = sanitizeString(payload.detail || '');
@@ -453,6 +475,9 @@ function saveTransaction(payload) {
 
     const sheet = getSheet(CONFIG.SHEET_NAMES.TRANSACTIONS);
     sheet.appendRow(newRow);
+
+    // จัดเรียงแถวใน Google Sheets ตาม วัน/เดือน/ปี ทันที
+    sortTransactionsSheet(sheet);
 
     return {
       success: true,
@@ -508,7 +533,7 @@ function updateTransaction(recordId, payload) {
     const direction = getTransactionDirection(type);
 
     let eggTrays = 0;
-    if (type === CONFIG.TRANSACTION_TYPES.EGG_INCOME) {
+    if (type === 'รับค่าไข่ไก่' || type === CONFIG.TRANSACTION_TYPES.EGG_INCOME) {
       eggTrays = parseInt(payload.egg_trays, 10);
       if (isNaN(eggTrays) || eggTrays < 1) {
         return { success: false, message: 'จำนวนแผงไข่ต้องเป็นตัวเลขจำนวนเต็มตั้งแต่ 1 แผงขึ้นไป' };
@@ -516,10 +541,20 @@ function updateTransaction(recordId, payload) {
     }
 
     let detail = '';
-    if (type === CONFIG.TRANSACTION_TYPES.OTHER_EXPENSE) {
+    if (type === 'รายรับเงินอื่น' || type === CONFIG.TRANSACTION_TYPES.OTHER_INCOME) {
       detail = sanitizeString(payload.detail);
       if (!detail) {
-        return { success: false, message: 'กรุณากรอกรายละเอียดเพิ่มเติมสำหรับรายการค่าอื่น ๆ' };
+        return { success: false, message: 'กรุณากรอกรายละเอียดเพิ่มเติมสำหรับรายการรายรับเงินอื่น' };
+      }
+    } else if (
+      type === 'ค่าอื่นๆ' ||
+      type === 'ค่าอื่น ๆ' ||
+      type === CONFIG.TRANSACTION_TYPES.OTHER_EXPENSE ||
+      type === CONFIG.TRANSACTION_TYPES.OTHER_EXPENSE_OLD
+    ) {
+      detail = sanitizeString(payload.detail);
+      if (!detail) {
+        return { success: false, message: 'กรุณากรอกรายละเอียดเพิ่มเติมสำหรับรายการค่าอื่นๆ' };
       }
     } else {
       detail = sanitizeString(payload.detail || '');
@@ -556,6 +591,9 @@ function updateTransaction(recordId, payload) {
     ];
 
     sheet.getRange(targetRowIndex, 1, 1, updatedValues.length).setValues([updatedValues]);
+
+    // จัดเรียงแถวใน Google Sheets ตาม วัน/เดือน/ปี ทันที
+    sortTransactionsSheet(sheet);
 
     return { success: true, message: 'อัปเดตข้อมูลรายการเรียบร้อยแล้ว' };
   } catch (error) {
@@ -599,6 +637,26 @@ function deleteTransaction(recordId) {
   }
 }
 
+/**
+ * ฟังก์ชันจัดเรียงแถวใน Google Sheets ตาม วัน/เดือน/ปี
+ * เพื่อให้เวลากรอกย้อนหลัง รายการจะถูกแทรกเรียงกันอย่างถูกต้องทั้งในชีตและบนหน้าเว็บ
+ */
+function sortTransactionsSheet(sheet) {
+  try {
+    const lastRow = sheet.getLastRow();
+    if (lastRow > 2) {
+      // เรียงตามวันที่ (Column 2: transaction_date) ล่าสุดไปอดีต และตามเวลาบันทึก (Column 10: created_at)
+      sheet.getRange(2, 1, lastRow - 1, CONFIG.TRANSACTION_COLUMNS.length)
+        .sort([
+          { column: 2, ascending: false },
+          { column: 10, ascending: false }
+        ]);
+    }
+  } catch (err) {
+    console.warn('sortTransactionsSheet notice: ' + err.message);
+  }
+}
+
 function getTransactions(filters) {
   try {
     filters = filters || {};
@@ -625,7 +683,17 @@ function getTransactions(filters) {
 
         const item = mapRowToTransaction(row);
 
-        if (filterType && item.transaction_type !== filterType) continue;
+        // ค้นหา/กรองตามประเภทรายการ (รองรับทั้งชื่อใหม่และชื่อเก่าเพื่อความเข้ากันได้)
+        if (filterType) {
+          if (filterType === 'ค่าหัวอาหารไก่') {
+            if (item.transaction_type !== 'ค่าหัวอาหารไก่' && item.transaction_type !== 'ค่าอาหารไก่ไข่') continue;
+          } else if (filterType === 'ค่าอื่นๆ' || filterType === 'ค่าอื่น ๆ') {
+            if (item.transaction_type !== 'ค่าอื่นๆ' && item.transaction_type !== 'ค่าอื่น ๆ') continue;
+          } else if (item.transaction_type !== filterType) {
+            continue;
+          }
+        }
+
         if (filterMonthYear && !item.transaction_date.startsWith(filterMonthYear)) continue;
         if (startDate && item.transaction_date < startDate) continue;
         if (endDate && item.transaction_date > endDate) continue;
@@ -646,20 +714,29 @@ function getTransactions(filters) {
       }
     }
 
+    // จัดเรียงรายการตาม วัน/เดือน/ปี (สามารถเลือก เรียงจากใหม่ไปเก่า หรือ เรียงจากเก่าไปใหม่ได้)
+    const sortOrder = filters.sortOrder === 'asc' ? 'asc' : 'desc';
     items.sort((a, b) => {
-      if (b.transaction_date !== a.transaction_date) {
-        return b.transaction_date.localeCompare(a.transaction_date);
+      if (a.transaction_date !== b.transaction_date) {
+        return sortOrder === 'asc'
+          ? a.transaction_date.localeCompare(b.transaction_date)
+          : b.transaction_date.localeCompare(a.transaction_date);
       }
-      return b.created_at.localeCompare(a.created_at);
+      return sortOrder === 'asc'
+        ? a.created_at.localeCompare(b.created_at)
+        : b.created_at.localeCompare(a.created_at);
     });
 
     const totalCount = items.length;
+    const reqPageSize = parseInt(filters.pageSize, 10);
+    // หากเลือกแสดงทั้งหมด หรือ pageSize >= 9999 ให้แสดงต่อกันเรื่อยๆ ครบทุกรายการ
+    const isShowAll = (reqPageSize === -1 || reqPageSize >= 9999);
+    const pageSize = isShowAll ? (totalCount || 1) : Math.max(1, reqPageSize || CONFIG.SYSTEM.DEFAULT_PAGE_SIZE);
     const page = Math.max(1, parseInt(filters.page, 10) || 1);
-    const pageSize = Math.max(1, parseInt(filters.pageSize, 10) || CONFIG.SYSTEM.DEFAULT_PAGE_SIZE);
-    const totalPages = Math.ceil(totalCount / pageSize) || 1;
+    const totalPages = isShowAll ? 1 : (Math.ceil(totalCount / pageSize) || 1);
 
     const startIndex = (page - 1) * pageSize;
-    const paginatedItems = items.slice(startIndex, startIndex + pageSize);
+    const paginatedItems = isShowAll ? items : items.slice(startIndex, startIndex + pageSize);
 
     return {
       success: true,
@@ -699,10 +776,14 @@ function getDashboardData(filters) {
     const dateRange = resolveDashboardDateRange(filters);
 
     let totalEggIncome = 0;
+    let totalOtherIncome = 0;
+    let totalIncome = 0;
     let totalExpense = 0;
     let totalEggTrays = 0;
     let totalFeedExpense = 0;
     let totalStrawExpense = 0;
+    let totalSupplementExpense = 0;
+    let totalFacilityExpense = 0;
     let totalOtherExpense = 0;
 
     const monthlyMap = {};
@@ -723,19 +804,32 @@ function getDashboardData(filters) {
         const amt = item.amount || 0;
         const type = item.transaction_type;
 
-        if (type === CONFIG.TRANSACTION_TYPES.EGG_INCOME) {
+        // แยกประเภทรายการทั้งหมด
+        if (type === 'รับค่าไข่ไก่' || type === CONFIG.TRANSACTION_TYPES.EGG_INCOME) {
           totalEggIncome += amt;
+          totalIncome += amt;
           totalEggTrays += item.egg_trays || 0;
-        } else if (type === CONFIG.TRANSACTION_TYPES.FEED_EXPENSE) {
+        } else if (type === 'รายรับเงินอื่น' || type === CONFIG.TRANSACTION_TYPES.OTHER_INCOME) {
+          totalOtherIncome += amt;
+          totalIncome += amt;
+        } else if (type === 'ค่าหัวอาหารไก่' || type === 'ค่าอาหารไก่ไข่' || type === CONFIG.TRANSACTION_TYPES.FEED_EXPENSE || type === CONFIG.TRANSACTION_TYPES.FEED_EXPENSE_OLD) {
           totalFeedExpense += amt;
           totalExpense += amt;
-        } else if (type === CONFIG.TRANSACTION_TYPES.STRAW_EXPENSE) {
+        } else if (type === 'ค่าฟางก้อน' || type === CONFIG.TRANSACTION_TYPES.STRAW_EXPENSE) {
           totalStrawExpense += amt;
           totalExpense += amt;
-        } else if (type === CONFIG.TRANSACTION_TYPES.OTHER_EXPENSE) {
+        } else if (type === 'ค่าอาหารเสริม' || type === CONFIG.TRANSACTION_TYPES.SUPPLEMENT_EXPENSE) {
+          totalSupplementExpense += amt;
+          totalExpense += amt;
+        } else if (type === 'ค่าวัสดุ-อุปกรณ์ปรับปรุงเล้า' || type === CONFIG.TRANSACTION_TYPES.FACILITY_EXPENSE) {
+          totalFacilityExpense += amt;
+          totalExpense += amt;
+        } else if (type === 'ค่าอื่นๆ' || type === 'ค่าอื่น ๆ' || type === CONFIG.TRANSACTION_TYPES.OTHER_EXPENSE || type === CONFIG.TRANSACTION_TYPES.OTHER_EXPENSE_OLD) {
           totalOtherExpense += amt;
           totalExpense += amt;
-        } else if (item.transaction_direction === CONFIG.DIRECTIONS.EXPENSE) {
+        } else if (item.transaction_direction === CONFIG.DIRECTIONS.INCOME) {
+          totalIncome += amt;
+        } else {
           totalExpense += amt;
         }
 
@@ -754,7 +848,7 @@ function getDashboardData(filters) {
       }
     }
 
-    const netProfit = totalEggIncome - totalExpense;
+    const netProfit = totalIncome - totalExpense;
     const sortedMonths = Object.keys(monthlyMap).sort();
     const chartLabels = [];
     const chartIncome = [];
@@ -783,12 +877,16 @@ function getDashboardData(filters) {
       period: filters.period,
       dateRange: dateRange,
       cards: {
+        totalIncome: Math.round(totalIncome * 100) / 100,
         totalEggIncome: Math.round(totalEggIncome * 100) / 100,
+        totalOtherIncome: Math.round(totalOtherIncome * 100) / 100,
         totalExpense: Math.round(totalExpense * 100) / 100,
         netProfit: Math.round(netProfit * 100) / 100,
         totalEggTrays: totalEggTrays,
         totalFeedExpense: Math.round(totalFeedExpense * 100) / 100,
         totalStrawExpense: Math.round(totalStrawExpense * 100) / 100,
+        totalSupplementExpense: Math.round(totalSupplementExpense * 100) / 100,
+        totalFacilityExpense: Math.round(totalFacilityExpense * 100) / 100,
         totalOtherExpense: Math.round(totalOtherExpense * 100) / 100
       },
       charts: {
@@ -799,10 +897,12 @@ function getDashboardData(filters) {
           trays: chartTrays
         },
         expenseBreakdown: {
-          labels: ['ค่าอาหารไก่ไข่', 'ค่าฟางก้อน', 'ค่าอื่น ๆ'],
+          labels: ['ค่าหัวอาหารไก่', 'ค่าฟางก้อน', 'ค่าอาหารเสริม', 'ค่าวัสดุ-อุปกรณ์ปรับปรุงเล้า', 'ค่าอื่นๆ'],
           data: [
             Math.round(totalFeedExpense * 100) / 100,
             Math.round(totalStrawExpense * 100) / 100,
+            Math.round(totalSupplementExpense * 100) / 100,
+            Math.round(totalFacilityExpense * 100) / 100,
             Math.round(totalOtherExpense * 100) / 100
           ]
         }
@@ -896,7 +996,15 @@ function getReportData(filters) {
 
         if (startDate && item.transaction_date < startDate) continue;
         if (endDate && item.transaction_date > endDate) continue;
-        if (targetType && targetType !== 'ALL' && item.transaction_type !== targetType) continue;
+        if (targetType && targetType !== 'ALL') {
+          if (targetType === 'ค่าหัวอาหารไก่') {
+            if (item.transaction_type !== 'ค่าหัวอาหารไก่' && item.transaction_type !== 'ค่าอาหารไก่ไข่') continue;
+          } else if (targetType === 'ค่าอื่นๆ' || targetType === 'ค่าอื่น ๆ') {
+            if (item.transaction_type !== 'ค่าอื่นๆ' && item.transaction_type !== 'ค่าอื่น ๆ') continue;
+          } else if (item.transaction_type !== targetType) {
+            continue;
+          }
+        }
 
         if (item.transaction_direction === CONFIG.DIRECTIONS.INCOME) {
           totalIncome += item.amount;
@@ -991,100 +1099,7 @@ function formatFullDateTimeThai(date) {
 
 
 // ============================================================================
-// 7. CAMERA SERVICE (ระบบกล้องวงจรปิด XIAOMI SMART CAMERA C300)
-// ============================================================================
-
-function getCameraConfig() {
-  try {
-    const settingsRes = getSettings();
-    const settings = settingsRes.success ? settingsRes.settings : {};
-
-    return {
-      success: true,
-      camera: {
-        model: settings.camera_name || 'Xiaomi Smart Camera C300',
-        connectionMode: settings.camera_connection_mode || 'APP',
-        gatewayUrl: settings.camera_gateway_url || '',
-        supportsDirectStream: false,
-        appDeepLink: 'mihome://',
-        appStoreUrlIos: 'https://apps.apple.com/app/mi-home-xiaomi-smarthome/id957323480',
-        playStoreUrlAndroid: 'https://play.google.com/store/apps/details?id=com.xiaomi.smarthome'
-      }
-    };
-  } catch (error) {
-    return {
-      success: false,
-      message: 'ไม่สามารถดึงข้อมูลการตั้งค่ากล้องได้: ' + error.message
-    };
-  }
-}
-
-function saveCameraConfig(config) {
-  try {
-    if (!config) return { success: false, message: 'ไม่พบข้อมูลการตั้งค่ากล้อง' };
-
-    const mode = (config.connectionMode || 'APP').toUpperCase();
-    if (mode !== 'APP' && mode !== 'GATEWAY') {
-      return { success: false, message: 'โหมดการเชื่อมต่อต้องเป็น APP หรือ GATEWAY เท่านั้น' };
-    }
-
-    let cleanGatewayUrl = (config.gatewayUrl || '').trim();
-    if (mode === 'GATEWAY' && cleanGatewayUrl) {
-      if (!cleanGatewayUrl.startsWith('https://')) {
-        return { success: false, message: 'Video Gateway URL ต้องขึ้นต้นด้วย https://' };
-      }
-      if (cleanGatewayUrl.includes('@')) {
-        return { success: false, message: 'ไม่อนุญาตให้ระบุ Username หรือ Password ลงใน URL' };
-      }
-    }
-
-    const payload = {
-      camera_connection_mode: mode,
-      camera_gateway_url: cleanGatewayUrl
-    };
-
-    return saveSettings(payload);
-  } catch (error) {
-    return { success: false, message: 'บันทึกการตั้งค่ากล้องล้มเหลว: ' + error.message };
-  }
-}
-
-function checkStreamHealth(url) {
-  try {
-    if (!url || !url.startsWith('https://')) {
-      return { online: false, message: 'กรุณาระบุ HTTPS URL ของ Video Gateway ที่ถูกต้อง' };
-    }
-
-    const response = UrlFetchApp.fetch(url, {
-      method: 'get',
-      muteHttpExceptions: true,
-      headers: {
-        'Accept': 'application/x-mpegURL, application/vnd.apple.mpegurl, */*'
-      }
-    });
-
-    const statusCode = response.getResponseCode();
-    if (statusCode >= 200 && statusCode < 400) {
-      return {
-        online: true,
-        statusCode: statusCode,
-        message: 'เชื่อมต่อ Video Gateway สำเร็จ (Status: ' + statusCode + ')'
-      };
-    } else {
-      return {
-        online: false,
-        statusCode: statusCode,
-        message: 'Video Gateway ตอบกลับด้วยสถานะ HTTP ' + statusCode
-      };
-    }
-  } catch (error) {
-    return { online: false, message: 'ไม่สามารถติดต่อ Video Gateway ได้: ' + error.message };
-  }
-}
-
-
-// ============================================================================
-// 8. MAIN WEB APP ROUTER & API ENDPOINTS
+// 7. MAIN WEB APP ROUTER & API ENDPOINTS
 // ============================================================================
 
 function doGet(e) {
@@ -1122,6 +1137,3 @@ function apiGetAttachment(fileId) { return getAttachment(fileId); }
 function apiGetReportData(filters) { return getReportData(filters); }
 function apiGetSettings() { return getSettings(); }
 function apiSaveSettings(payload) { return saveSettings(payload); }
-function apiGetCameraConfig() { return getCameraConfig(); }
-function apiSaveCameraConfig(config) { return saveCameraConfig(config); }
-function apiCheckStreamHealth(url) { return checkStreamHealth(url); }
