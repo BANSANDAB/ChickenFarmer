@@ -769,7 +769,7 @@ function getTransactions(filters) {
 
 function getDashboardData(filters) {
   try {
-    filters = filters || { period: 'this_month' };
+    filters = filters || { period: 'all' };
     const sheet = getSheet(CONFIG.SHEET_NAMES.TRANSACTIONS);
     const data = sheet.getDataRange().getValues();
 
@@ -933,8 +933,9 @@ function resolveDashboardDateRange(filters) {
       return { startDate: `${thisYearStr}-01-01`, endDate: todayStr, label: 'ปีนี้' };
     case 'custom':
       return { startDate: filters.startDate || '', endDate: filters.endDate || '', label: 'ช่วงวันที่กำหนด' };
+    case 'all':
     default:
-      return { startDate: `${thisMonthStr}-01`, endDate: todayStr, label: 'เดือนนี้' };
+      return { startDate: '', endDate: '', label: 'ยอดรวมทั้งหมด' };
   }
 }
 
