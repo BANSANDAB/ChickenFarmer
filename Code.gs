@@ -1110,8 +1110,13 @@ function doGet(e) {
       return handleApiRequest(e);
     }
 
-    // 2. แสดงหน้า Web App สำหรับ Google Apps Script ปกติ
-    const template = HtmlService.createTemplateFromFile('Index');
+    // 2. แสดงหน้า Web App สำหรับ Google Apps Script ปกติ (รองรับทั้งชื่อ Index และ index)
+    let template;
+    try {
+      template = HtmlService.createTemplateFromFile('Index');
+    } catch (_) {
+      template = HtmlService.createTemplateFromFile('index');
+    }
     template.appTitle = 'ระบบบริหารจัดการฟาร์มไก่ไข่';
     template.spreadsheetId = CONFIG.SPREADSHEET_ID;
 
