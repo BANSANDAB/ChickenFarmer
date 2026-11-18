@@ -821,24 +821,9 @@
       <div class="sidebar-nav">
         <div class="nav-section-title">เมนูหลัก</div>
         
-        <a href="javascript:void(0)" class="nav-item-link active" id="navLinkDashboard" onclick="scrollToSection('sectionDashboard')">
-          <i class="bi bi-grid-1x2-fill"></i>
-          <span>สรุปภาพรวมการเงิน</span>
-        </a>
-
-        <a href="javascript:void(0)" class="nav-item-link" id="navLinkForm" onclick="scrollToSection('sectionForm')">
-          <i class="bi bi-journal-plus"></i>
-          <span>บันทึกรายรับ–รายจ่าย</span>
-        </a>
-
-        <a href="javascript:void(0)" class="nav-item-link" id="navLinkTable" onclick="scrollToSection('sectionTable')">
-          <i class="bi bi-table"></i>
-          <span>ตารางรายการที่บันทึก</span>
-        </a>
-
-        <a href="javascript:void(0)" class="nav-item-link" id="navLinkReport" onclick="openReportModal()">
-          <i class="bi bi-printer"></i>
-          <span>พิมพ์รายงาน</span>
+        <a href="javascript:void(0)" class="nav-item-link active" id="navLinkTransactions" onclick="scrollToSection('sectionDashboard')">
+          <i class="bi bi-journal-check"></i>
+          <span>บันทึกรายรับ-รายจ่าย</span>
         </a>
 
         <div class="nav-section-title mt-4">ฐานข้อมูล & ข้อมูลระบบ</div>
@@ -1726,26 +1711,13 @@
       if (el) {
         el.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
-      document.querySelectorAll('.nav-item-link').forEach(l => l.classList.remove('active'));
-      if (sectionId === 'sectionDashboard') {
-        const l = document.getElementById('navLinkDashboard');
-        if (l) l.classList.add('active');
-      } else if (sectionId === 'sectionForm') {
-        const l = document.getElementById('navLinkForm');
-        if (l) l.classList.add('active');
-      } else if (sectionId === 'sectionTable') {
-        const l = document.getElementById('navLinkTable');
-        if (l) l.classList.add('active');
-      }
+      const activeLink = document.getElementById('navLinkTransactions');
+      if (activeLink) activeLink.classList.add('active');
     }
 
     function switchPage(pageId) {
       closeSidebarMobile();
-      if (pageId === 'dashboard') {
-        scrollToSection('sectionDashboard');
-      } else {
-        scrollToSection('sectionForm');
-      }
+      scrollToSection('sectionDashboard');
     }
 
     function refreshCurrentPage() {
