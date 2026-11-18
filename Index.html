@@ -833,7 +833,7 @@
             <span id="dbStatusText">Google Sheets พร้อมใช้งาน</span>
           </div>
           <div class="text-truncate text-secondary" style="font-size: 0.72rem;">
-            ID: <?= spreadsheetId ?>
+            ID: <span id="sidebarSpreadsheetId"><?= typeof spreadsheetId !== 'undefined' ? spreadsheetId : '1AmRxzTRyd4-EerC4V9ISIuM1wSe2qNU_u22KkbTrLoQ' ?></span>
           </div>
         </div>
       </div>
@@ -841,7 +841,7 @@
       <div class="sidebar-footer">
         <div class="d-flex justify-content-between align-items-center">
           <span>เวอร์ชัน 1.0.0</span>
-          <a href="https://docs.google.com/spreadsheets/d/<?= spreadsheetId ?>" target="_blank" class="text-decoration-none text-muted" title="เปิด Google Sheets">
+          <a id="sidebarSpreadsheetLink" href="https://docs.google.com/spreadsheets/d/<?= typeof spreadsheetId !== 'undefined' ? spreadsheetId : '1AmRxzTRyd4-EerC4V9ISIuM1wSe2qNU_u22KkbTrLoQ' ?>" target="_blank" class="text-decoration-none text-muted" title="เปิด Google Sheets">
             <i class="bi bi-box-arrow-up-right"></i>
           </a>
         </div>
@@ -898,41 +898,12 @@
                1. สรุปภาพรวมการเงิน (แสดงเฉพาะ 3 ยอด: ยอดรับทั้งหมด, ยอดจ่ายทั้งหมด, ยอดคงเหลือจริง)
                ======================================================== -->
           <div class="farm-card mb-4" id="sectionDashboard">
-            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
-              <div class="d-flex align-items-center gap-2">
-                <div class="section-icon-badge">
-                  <i class="bi bi-graph-up-arrow"></i>
-                </div>
-                <div>
-                  <h5 class="mb-0 fw-bold">สรุปภาพรวมการเงิน</h5>
-                </div>
+            <div class="d-flex align-items-center gap-2 mb-3">
+              <div class="section-icon-badge">
+                <i class="bi bi-graph-up-arrow"></i>
               </div>
-
-              <!-- Filter Buttons: วันนี้, เดือนนี้, ปีนี้, กำหนดช่วงวันที่ -->
-              <div class="d-flex flex-wrap align-items-center gap-2">
-                <div class="btn-group period-btn-group" role="group">
-                  <button type="button" class="btn btn-sm btn-farm-secondary period-btn" data-period="today" onclick="setDashboardPeriod('today')">วันนี้</button>
-                  <button type="button" class="btn btn-sm btn-farm-primary period-btn" data-period="this_month" onclick="setDashboardPeriod('this_month')">เดือนนี้</button>
-                  <button type="button" class="btn btn-sm btn-farm-secondary period-btn" data-period="this_year" onclick="setDashboardPeriod('this_year')">ปีนี้</button>
-                  <button type="button" class="btn btn-sm btn-farm-secondary period-btn" data-period="custom" onclick="toggleCustomDateFilter()">กำหนดช่วงวันที่</button>
-                </div>
-              </div>
-            </div>
-
-            <!-- Custom Date Range Form (แสดงเมื่อคลิก กำหนดช่วงวันที่) -->
-            <div id="customDateRangeBox" class="pt-3 border-top d-none mb-3">
-              <div class="row g-2 align-items-end">
-                <div class="col-12 col-sm-5">
-                  <label class="form-label small mb-1">วันเริ่มต้น</label>
-                  <input type="date" class="form-control form-control-sm" id="dashStartDate">
-                </div>
-                <div class="col-12 col-sm-5">
-                  <label class="form-label small mb-1">วันสิ้นสุด</label>
-                  <input type="date" class="form-control form-control-sm" id="dashEndDate">
-                </div>
-                <div class="col-12 col-sm-2">
-                  <button class="btn btn-sm btn-farm-primary w-100" onclick="applyCustomDashboardDate()">กรองข้อมูล</button>
-                </div>
+              <div>
+                <h5 class="mb-0 fw-bold">สรุปภาพรวมการเงิน</h5>
               </div>
             </div>
 
@@ -1511,10 +1482,102 @@
 
   <!-- Complete Inlined Client Scripts -->
   <script>
+    // ========================================================================
+    // UNIVERSAL API BRIDGE (รองรับทั้ง Google Apps Script และ GitHub Pages)
+    // ========================================================================
+    const GAS_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbw1z7Np9YGgZob5uYo0_EPyUSsemCAcIuFTXeGtY8jj_zMkiRzbvCQYUdMpDx-2zLSt/exec';
+
+    if (typeof window.google === 'undefined') {
+      window.google = {};
+    }
+    if (!window.google.script) {
+      window.google.script = {};
+    }
+    if (!window.google.script.run) {
+      class GasRunner {
+        constructor(successHandler, failureHandler) {
+          this.successHandler = successHandler || null;
+          this.failureHandler = failureHandler || null;
+        }
+        withSuccessHandler(fn) {
+          return new GasRunner(fn, this.failureHandler);
+        }
+        withFailureHandler(fn) {
+          return new GasRunner(this.successHandler, fn);
+        }
+        _call(action, data) {
+          const onSuccess = this.successHandler || function () {};
+          const onFailure = this.failureHandler || function (err) { console.error('GAS API Error:', err); };
+
+          fetch(GAS_WEBAPP_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({ action: action, data: data })
+          })
+          .then(res => {
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            return res.json();
+          })
+          .then(result => {
+            onSuccess(result);
+          })
+          .catch(err => {
+            // Fallback via JSONP for browsers/hosts with strict CORS policies
+            const cbName = 'gas_cb_' + Date.now() + '_' + Math.floor(Math.random() * 100000);
+            let scriptEl = null;
+            let timeoutId = null;
+
+            window[cbName] = function (result) {
+              clearTimeout(timeoutId);
+              delete window[cbName];
+              if (scriptEl && scriptEl.parentNode) scriptEl.parentNode.removeChild(scriptEl);
+              onSuccess(result);
+            };
+
+            scriptEl = document.createElement('script');
+            const qs = new URLSearchParams();
+            qs.append('action', action);
+            qs.append('callback', cbName);
+            qs.append('payload', JSON.stringify(data || {}));
+            scriptEl.src = GAS_WEBAPP_URL + '?' + qs.toString();
+
+            scriptEl.onerror = function () {
+              clearTimeout(timeoutId);
+              delete window[cbName];
+              if (scriptEl && scriptEl.parentNode) scriptEl.parentNode.removeChild(scriptEl);
+              onFailure(new Error('ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ Google Apps Script ได้'));
+            };
+
+            timeoutId = setTimeout(function () {
+              delete window[cbName];
+              if (scriptEl && scriptEl.parentNode) scriptEl.parentNode.removeChild(scriptEl);
+              onFailure(new Error('การเชื่อมต่อหมดเวลา (Timeout)'));
+            }, 30000);
+
+            document.body.appendChild(scriptEl);
+          });
+        }
+
+        apiSetupDatabase() { this._call('setupDatabase', {}); }
+        apiGetDashboardData(filters) { this._call('getDashboardData', { filters: filters }); }
+        apiGetTransactions(filters) { this._call('getTransactions', { filters: filters }); }
+        apiSaveTransaction(payload) { this._call('saveTransaction', { payload: payload }); }
+        apiUpdateTransaction(recordId, payload) { this._call('updateTransaction', { recordId: recordId, payload: payload }); }
+        apiDeleteTransaction(recordId) { this._call('deleteTransaction', { recordId: recordId }); }
+        apiUploadAttachment(fileData) { this._call('uploadAttachment', { fileData: fileData }); }
+        apiGetAttachment(fileId) { this._call('getAttachment', { fileId: fileId }); }
+        apiGetReportData(filters) { this._call('getReportData', { filters: filters }); }
+        apiGetSettings() { this._call('getSettings', {}); }
+        apiSaveSettings(payload) { this._call('saveSettings', { payload: payload }); }
+      }
+
+      window.google.script.run = new GasRunner();
+    }
+
     const state = {
       currentPage: 'dashboard',
-      dashboardPeriod: 'this_month',
-      dashboardFilters: { period: 'this_month', startDate: '', endDate: '' },
+      dashboardPeriod: 'all',
+      dashboardFilters: { period: 'all', startDate: '', endDate: '' },
       transactionsPage: 1,
       transactionsPageSize: 9999,
       transactionsSortOrder: 'desc',
@@ -1533,6 +1596,16 @@
     const THAI_DAYS = ['วันอาทิตย์', 'วันจันทร์', 'วันอังคาร', 'วันพุธ', 'วันพฤหัสบดี', 'วันศุกร์', 'วันเสาร์'];
 
     function initApp() {
+      // ตรวจสอบและแทนที่ค่า ID กรณีเปิดใช้งานบน Standalone เช่น GitHub Pages
+      const idEl = document.getElementById('sidebarSpreadsheetId');
+      if (idEl && (!idEl.textContent || idEl.textContent.includes('<?'))) {
+        idEl.textContent = '1AmRxzTRyd4-EerC4V9ISIuM1wSe2qNU_u22KkbTrLoQ';
+      }
+      const linkEl = document.getElementById('sidebarSpreadsheetLink');
+      if (linkEl && linkEl.getAttribute('href') && linkEl.getAttribute('href').includes('<?')) {
+        linkEl.href = 'https://docs.google.com/spreadsheets/d/1AmRxzTRyd4-EerC4V9ISIuM1wSe2qNU_u22KkbTrLoQ';
+      }
+
       initTheme();
       sound.init();
       initLiveThaiDate();
@@ -1818,10 +1891,14 @@
         activeBtn.classList.add('btn-farm-primary');
       }
       const customBox = document.getElementById('customDateRangeBox');
-      if (period === 'custom') {
-        customBox.classList.remove('d-none');
+      if (customBox) {
+        if (period === 'custom') {
+          customBox.classList.remove('d-none');
+        } else {
+          customBox.classList.add('d-none');
+          loadDashboard();
+        }
       } else {
-        customBox.classList.add('d-none');
         loadDashboard();
       }
     }
