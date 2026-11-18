@@ -2,64 +2,70 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="refresh" content="0; url=https://script.google.com/macros/s/AKfycbw1z7Np9YGgZob5uYo0_EPyUSsemCAcIuFTXeGtY8jj_zMkiRzbvCQYUdMpDx-2zLSt/exec">
   <title>ระบบบริหารจัดการฟาร์มไก่ไข่ | Egg Farm Management System</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🥚</text></svg>">
+  <script>
+    // สลับไปยัง Web App ทันทีเพื่อป้องกันปัญหาเบราว์เซอร์บล็อก iframe sandbox
+    window.location.replace("https://script.google.com/macros/s/AKfycbw1z7Np9YGgZob5uYo0_EPyUSsemCAcIuFTXeGtY8jj_zMkiRzbvCQYUdMpDx-2zLSt/exec");
+  </script>
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-    html, body {
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
+    body {
       background-color: #121A16;
+      color: #FFFFFF;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      text-align: center;
+      padding: 20px;
     }
-    #appFrame {
-      width: 100%;
-      height: 100%;
-      border: none;
-      display: block;
+    .card {
+      background: #1B2620;
+      border: 1px solid #26382F;
+      padding: 30px;
+      border-radius: 16px;
+      max-width: 450px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.4);
     }
-    .fallback-bar {
-      position: fixed;
-      bottom: 8px;
-      right: 12px;
-      z-index: 9999;
-      background: rgba(22, 132, 91, 0.9);
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid rgba(22, 132, 91, 0.2);
+      border-top-color: #10B981;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 16px;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    h2 { font-size: 1.25rem; margin-bottom: 8px; color: #EAF7EF; }
+    p { font-size: 0.9rem; color: #95A99F; margin-bottom: 16px; }
+    a {
+      display: inline-block;
+      background: #16845B;
       color: #fff;
-      padding: 6px 12px;
-      border-radius: 20px;
-      font-size: 12px;
       text-decoration: none;
-      backdrop-filter: blur(4px);
-      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-      transition: all 0.2s ease;
+      padding: 8px 18px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 500;
     }
-    .fallback-bar:hover {
-      background: #106243;
-      color: #fff;
-    }
+    a:hover { background: #106243; }
   </style>
 </head>
 <body>
-
-  <!-- ฝัง Web App จาก Google Apps Script แบบเต็มจอ 100% -->
-  <iframe 
-    id="appFrame" 
-    src="https://script.google.com/macros/s/AKfycbw1z7Np9YGgZob5uYo0_EPyUSsemCAcIuFTXeGtY8jj_zMkiRzbvCQYUdMpDx-2zLSt/exec" 
-    allow="camera; autoplay; fullscreen" 
-    sandbox="allow-forms allow-modals allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts">
-  </iframe>
-
-  <!-- ปุ่มลัดกรณีต้องการเปิดหน้าต่างแยก -->
-  <a href="https://script.google.com/macros/s/AKfycbw1z7Np9YGgZob5uYo0_EPyUSsemCAcIuFTXeGtY8jj_zMkiRzbvCQYUdMpDx-2zLSt/exec" target="_blank" class="fallback-bar" title="เปิดหน้าต่างเต็ม">
-    ↗ เปิดลิงก์ตรง
-  </a>
-
+  <div class="card">
+    <div class="spinner"></div>
+    <h2>กำลังเปิดระบบบริหารจัดการฟาร์มไก่ไข่...</h2>
+    <p>กำลังเชื่อมต่อไปยังเซิร์ฟเวอร์ Google Apps Script อย่างปลอดภัย</p>
+    <a href="https://script.google.com/macros/s/AKfycbw1z7Np9YGgZob5uYo0_EPyUSsemCAcIuFTXeGtY8jj_zMkiRzbvCQYUdMpDx-2zLSt/exec">
+      คลิกที่นี่หากไม่เปลี่ยนหน้าอัตโนมัติ
+    </a>
+  </div>
 </body>
 </html>
-
